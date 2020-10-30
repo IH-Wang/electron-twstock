@@ -1,0 +1,15 @@
+main {
+	width: 100%;
+	height: 100%;
+}
+
+h1 {
+	font-family: 'Comic Sans MS';
+	font-weight: 300;
+	color: purple;
+	margin: 2em auto;
+	text-align: center;
+	span {
+		font-size: 2em;
+	}
+}
