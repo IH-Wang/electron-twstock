@@ -2,7 +2,7 @@
 </style>
 
 <script>
-	import './App.scss';
+	import './App.module.scss';
 </script>
 
 <main>
