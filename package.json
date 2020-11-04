@@ -40,6 +40,7 @@
     "eslint-plugin-svelte3": "^2.7.3",
     "node-sass": "^4.14.1",
     "npm-run-all": "^4.1.5",
+    "prettier": "2.1.2",
     "prettier-plugin-svelte": "^1.4.1",
     "rollup": "^2.32.1",
     "rollup-plugin-livereload": "^2.0.0",
@@ -50,7 +51,6 @@
     "svelte": "^3.29.4"
   },
   "dependencies": {
-    "cross-env": "^7.0.2",
-    "normalize.css": "^8.0.1"
+    "cross-env": "^7.0.2"
   }
 }
