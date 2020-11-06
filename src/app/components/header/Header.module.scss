@@ -1,0 +1,30 @@
+.titleBar {
+	// -webkit-app-region: drag;
+	display: flex;
+	width: 100%;
+	height: 10%;
+	background: var(--theme-titleBar);
+	user-select: none;
+	cursor: pointer;
+}
+.titleLogo {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	> img,
+	span {
+		padding-left: 1em;
+	}
+}
+
+.titleControl {
+	flex: 4;
+	font-size: 30px;
+}
+.titleButton {
+	height: 100%;
+	border: 0;
+	outline: 0;
+	background: transparent;
+	color: white;
+}

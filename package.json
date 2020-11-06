@@ -51,6 +51,11 @@
     "svelte": "^3.29.4"
   },
   "dependencies": {
-    "cross-env": "^7.0.2"
+    "cross-env": "^7.0.2",
+    "headless-chrome-crawler": "^1.8.0",
+    "pouchdb-adapter-indexeddb": "^7.2.2",
+    "ramda": "^0.27.1",
+    "rxdb": "^9.8.0",
+    "rxjs": "^6.6.3"
   }
 }
