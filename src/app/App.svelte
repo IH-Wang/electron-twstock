@@ -6,9 +6,16 @@
 </style>
 
 <script>
+	import { onMount } from 'svelte';
 	import ThemeContext from './context/ThemeContext.svelte';
 	import Header from './components/header/Header.svelte';
 	import './App.module.scss';
+
+	onMount(async () => {
+		if (window.db) {
+			console.log(await window.db.stockCodes.getAll());
+		}
+	});
 </script>
 
 <ThemeContext>

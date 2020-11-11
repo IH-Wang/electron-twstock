@@ -51,8 +51,8 @@ export default {
 		postcss({
 			extract: true,
 			minimize: true,
-			modules: true,
-			namedExports: true,
+			modules: false,
+			namedExports: false,
 			use: [
 				[
 					'sass',

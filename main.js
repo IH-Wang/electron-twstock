@@ -3,7 +3,8 @@ const { app, BrowserWindow, Menu, screen, ipcMain } = require('electron');
 const HCCrawler = require('headless-chrome-crawler');
 const path = require('path');
 require('electron-reload')(__dirname);
-
+const db = require('./db/db');
+global.db = db;
 // 上市
 const TWSE_URL = 'https://isin.twse.com.tw/isin/C_public.jsp?strMode=2';
 // 上櫃
@@ -21,6 +22,7 @@ function createWindow() {
 		height: height / 1.1,
 		webPreferences: {
 			nodeIntegration: true,
+			enableRemoteModule: true,
 			preload: path.join(__dirname, 'preload.js'),
 		},
 		frame: false, // 標題列顯示
@@ -44,9 +46,21 @@ function createWindow() {
 	});
 }
 
-app.on('ready', () => {
+app.on('ready', async () => {
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;
+	const R = require('ramda');
+
 	createWindow();
+	const stockCodes = await db.stockCodes.getAll();
+	if (R.isEmpty(stockCodes)) {
+		const [twseRes, otcRes, emergingRes] = await Promise.all([
+			await crawlStockCodeList(TWSE_URL),
+			await crawlStockCodeList(OTC_URL),
+			await crawlStockCodeList(EMERGING_URL),
+		]);
+		const stockList = [...twseRes, ...otcRes, ...emergingRes];
+		await db.stockCodes.create(stockList.filter((stock) => stock.name.indexOf('　') === -1));
+	}
 });
 
 app.on('window-all-closed', () => {
@@ -58,18 +72,11 @@ app.on('activate', () => {
 	if (!mainWindow) createWindow();
 });
 
-ipcMain.handle('crawl-stock-code', async () => {
-	console.log('test');
-	const [twseRes, otcRes, emergingRes] = await Promise.all([
-		await crawlStockCodeList(TWSE_URL),
-		await crawlStockCodeList(OTC_URL),
-		await crawlStockCodeList(EMERGING_URL),
-	]);
-	const stockList = [...twseRes, ...otcRes, ...emergingRes];
-	return stockList.filter((stock) => stock.name.indexOf('　') === -1);
+ipcMain.handle('getStockCode', async () => {
+	return await db.stockCodes.getAll();
 });
 
-ipcMain.once('minimize', () => {
+ipcMain.on('minimize', () => {
 	mainWindow.minimize();
 });
 

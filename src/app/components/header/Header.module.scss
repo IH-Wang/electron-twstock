@@ -1,11 +1,14 @@
 .titleBar {
-	// -webkit-app-region: drag;
+	-webkit-app-region: drag;
 	display: flex;
 	width: 100%;
-	height: 10%;
+	height: 40px;
 	background: var(--theme-titleBar);
 	user-select: none;
 	cursor: pointer;
+	align-items: center;
+	justify-content: space-around;
+	flex-wrap: wrap;
 }
 .titleLogo {
 	display: flex;
@@ -18,13 +21,32 @@
 }
 
 .titleControl {
-	flex: 4;
-	font-size: 30px;
+	flex: 1;
+	> ul {
+		margin: 0;
+		text-align: right;
+		> li {
+			display: inline;
+			.darkModeIcon {
+				color: #333;
+				padding-left: 0.2em;
+			}
+		}
+		.darkMode {
+			border-radius: 0.8em;
+			background-color: aliceblue;
+		}
+	}
 }
+
 .titleButton {
 	height: 100%;
 	border: 0;
 	outline: 0;
 	background: transparent;
 	color: white;
+	:hover {
+		cursor: pointer;
+		color: #aaa;
+	}
 }
