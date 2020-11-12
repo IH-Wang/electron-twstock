@@ -5,10 +5,10 @@
   "main": "main.js",
   "scripts": {
     "start": "run-p build:watch start:electron",
-    "start:electron": "NODE_ENV=dev electron .",
+    "start:electron": "cross-env NODE_ENV=dev electron .",
     "build": "rollup -c",
     "build:watch": "rollup -c -w",
-    "postinstall": "NODE_ENV=prod electron-builder install-app-deps",
+    "postinstall": "cross-env NODE_ENV=prod electron-builder install-app-deps",
     "package": "electron-packager . --out=dist --ignore=src --ignore=rollup.config.js --ignore=.gitignore --overwrite",
     "package:windows": "node scripts/builder.js",
     "format": "prettier --write '{public,src}/**/*.{css,html,js,svelte}'",
@@ -53,10 +53,13 @@
   "dependencies": {
     "@electron/remote": "^1.0.0",
     "@smui/form-field": "^1.0.0",
+    "@smui/paper": "^1.0.0",
     "@smui/switch": "^1.0.0",
     "cross-env": "^7.0.2",
     "headless-chrome-crawler": "^1.8.0",
     "nedb-promises": "^4.1.0",
-    "ramda": "^0.27.1"
+    "ramda": "^0.27.1",
+    "svelte-loading-spinners": "^0.1.1",
+    "svelte-spa-router": "^3.0.5"
   }
 }

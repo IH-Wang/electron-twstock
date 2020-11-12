@@ -1,7 +1,7 @@
 <script>
 	import { onMount, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { themes as _themes } from '../theme/themes.js';
+	import { themes as _themes } from '../../theme/themes.js';
 
 	export let themes = [..._themes];
 	let current = themes[0].name;

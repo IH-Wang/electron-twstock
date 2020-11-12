@@ -1,10 +1,10 @@
 .titleBar {
 	-webkit-app-region: drag;
+	-webkit-user-select: none;
 	display: flex;
 	width: 100%;
 	height: 40px;
-	background: var(--theme-titleBar);
-	user-select: none;
+	background: var(--theme-titleBarBG);
 	cursor: pointer;
 	align-items: center;
 	justify-content: space-around;
@@ -17,24 +17,27 @@
 	> img,
 	span {
 		padding-left: 1em;
+		color: var(--theme-titleBarText);
 	}
 }
 
 .titleControl {
 	flex: 1;
+
 	> ul {
 		margin: 0;
 		text-align: right;
 		> li {
-			display: inline;
+			display: inline-flex;
+			-webkit-app-region: no-drag;
 			.darkModeIcon {
-				color: #333;
+				color: var(--theme-titleBarSwitchText);
 				padding-left: 0.2em;
 			}
 		}
 		.darkMode {
 			border-radius: 0.8em;
-			background-color: aliceblue;
+			background-color: var(--theme-titleBarSwitchBG);
 		}
 	}
 }
@@ -44,7 +47,7 @@
 	border: 0;
 	outline: 0;
 	background: transparent;
-	color: white;
+	color: var(--theme-titleBarText);
 	:hover {
 		cursor: pointer;
 		color: #aaa;

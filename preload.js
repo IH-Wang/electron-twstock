@@ -1,5 +1,4 @@
 const { ipcRenderer, remote } = require('electron');
-
 window.addEventListener('DOMContentLoaded', async () => {
 	// const database = require('./db/database');
 	// const db = await database.getDatabase();

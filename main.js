@@ -20,6 +20,7 @@ function createWindow() {
 	mainWindow = new BrowserWindow({
 		width: width / 1.1,
 		height: height / 1.1,
+		icon: `${__dirname}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'ico'}`,
 		webPreferences: {
 			nodeIntegration: true,
 			enableRemoteModule: true,
@@ -29,6 +30,8 @@ function createWindow() {
 		transparent: false, // 背景透明
 		autoHideMenuBar: true, //  工具列不顯示
 	});
+
+	mainWindow.title = '股溝';
 	mainWindow.on('minimize', (e) => {
 		e.preventDefault();
 		mainWindow.minimize();
@@ -40,13 +43,17 @@ function createWindow() {
 	});
 
 	mainWindow.loadFile('public/index.html');
-	mainWindow.webContents.openDevTools();
+	if (process.env.NODE_ENV === 'dev') {
+		mainWindow.webContents.openDevTools();
+	}
+
 	mainWindow.on('closed', () => {
 		mainWindow = null;
 	});
 }
 
 app.on('ready', async () => {
+	app.setName('股溝');
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;
 	const R = require('ramda');
 
@@ -77,7 +84,16 @@ ipcMain.handle('getStockCode', async () => {
 });
 
 ipcMain.on('minimize', () => {
-	mainWindow.minimize();
+	const win = BrowserWindow.getFocusedWindow();
+	win.minimize();
+});
+ipcMain.on('maximize', () => {
+	const win = BrowserWindow.getFocusedWindow();
+	win.setFullScreen(!win.isFullScreen());
+});
+ipcMain.on('close', () => {
+	const win = BrowserWindow.getFocusedWindow();
+	win.close();
 });
 
 const crawlStockCodeList = async (url) => {

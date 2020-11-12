@@ -7,16 +7,16 @@
 	const { toggle } = getContext('theme');
 	let toggleSelect = false;
 
-	let minimize = async () => {
-		// window.ipcRenderer.send('minimize');
+	let minimize = () => {
+		window.ipcRenderer.send('minimize');
 		// const result = await window.ipcRenderer.invoke('getStockCode');
 	};
-	let maximize = async () => {
-		// window.ipcRenderer.send('minimize');
+	let maximize = () => {
+		window.ipcRenderer.send('maximize');
 		// const result = await window.ipcRenderer.invoke('getStockCode');
 	};
-	let close = async () => {
-		// window.ipcRenderer.send('minimize');
+	let close = () => {
+		window.ipcRenderer.send('close');
 		// const result = await window.ipcRenderer.invoke('getStockCode');
 	};
 </script>

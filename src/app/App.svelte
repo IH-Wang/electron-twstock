@@ -6,21 +6,23 @@
 </style>
 
 <script>
-	import { onMount } from 'svelte';
+	import Router from 'svelte-spa-router';
+	// context
 	import ThemeContext from './context/ThemeContext.svelte';
+	import DatabaseContext from './context/DatabaseContext.svelte';
+	// titleBar
 	import Header from './components/header/Header.svelte';
+	// routes
+	import routes from './routes';
+	// css
 	import './App.module.scss';
-
-	onMount(async () => {
-		if (window.db) {
-			console.log(await window.db.stockCodes.getAll());
-		}
-	});
 </script>
 
 <ThemeContext>
 	<Header />
 	<main>
-		<h1><span>TEST</span>Hello world!</h1>
+		<DatabaseContext>
+			<Router routes="{routes}" />
+		</DatabaseContext>
 	</main>
 </ThemeContext>
