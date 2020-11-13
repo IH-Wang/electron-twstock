@@ -13,8 +13,14 @@
 	import { Wave } from 'svelte-loading-spinners';
 	// import AddFavorite from '../components/initial/AddFavorite.svelte';
 	const db = getContext('db');
+	// let i = 0;
 	onMount(async () => {
-		console.log(await db.store);
+		const store = await db.store;
+		console.log(await store.stockCodes.getAll());
+		if (window.ipcRenderer) {
+			const res = await window.ipcRenderer.invoke('initStockInfo', { code: 4906, days: 121 });
+			console.log(res);
+		}
 	});
 </script>
 
