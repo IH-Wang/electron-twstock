@@ -1,60 +1,66 @@
 'use strict';
-const { app, BrowserWindow, Menu, screen, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, screen, ipcMain, nativeImage } = require('electron');
 const path = require('path');
+const R = require('ramda');
+const fs = require('fs');
 require('electron-reload')(__dirname);
 const db = require('./db/db');
-const twStockCrawler = require('./public/static/js/twStockCrawler.min');
+const twStockCrawler = require('./public/util/crawler');
 global.db = db;
 
 let mainWindow;
 function createWindow() {
-	// Create the browser window.
-	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-	Menu.setApplicationMenu(false);
-	mainWindow = new BrowserWindow({
-		width: width / 1.1,
-		height: height / 1.1,
-		icon: `${__dirname}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'ico'}`,
-		webPreferences: {
-			nodeIntegration: true,
-			enableRemoteModule: true,
-			preload: path.join(__dirname, 'preload.js'),
-		},
-		frame: false, // 標題列顯示
-		transparent: false, // 背景透明
-		autoHideMenuBar: true, //  工具列不顯示
-	});
+	const timer = setInterval(() => {
+		if (fs.existsSync('./public/build/bundle.js')) {
+			clearInterval(timer);
 
-	mainWindow.title = '股溝';
-	mainWindow.on('minimize', (e) => {
-		e.preventDefault();
-		mainWindow.minimize();
-	});
+			// Create the browser window.
+			const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+			Menu.setApplicationMenu(false);
+			mainWindow = new BrowserWindow({
+				width: width / 1.1,
+				height: height / 1.1,
+				title: '股溝',
+				icon: `${__dirname}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'icns'}`,
+				webPreferences: {
+					nodeIntegration: true,
+					enableRemoteModule: true,
+					preload: path.join(__dirname, 'preload.js'),
+				},
+				frame: false, // 標題列顯示
+				transparent: false, // 背景透明
+				autoHideMenuBar: true, //  工具列不顯示
+			});
 
-	mainWindow.on('close', (e) => {
-		e.preventDefault();
-		mainWindow.hide();
-	});
+			mainWindow.on('minimize', (e) => {
+				e.preventDefault();
+				mainWindow.minimize();
+			});
 
-	mainWindow.loadFile('public/index.html');
-	if (process.env.NODE_ENV === 'dev') {
-		mainWindow.webContents.openDevTools();
-	}
+			mainWindow.on('close', (e) => {
+				e.preventDefault();
+				mainWindow.hide();
+			});
 
-	mainWindow.on('closed', () => {
-		mainWindow = null;
-	});
+			mainWindow.loadFile('public/index.html');
+			if (process.env.NODE_ENV === 'dev') {
+				mainWindow.webContents.openDevTools();
+			}
+
+			mainWindow.on('closed', () => {
+				mainWindow = null;
+			});
+		}
+	}, 500);
 }
-
 app.on('ready', async () => {
 	app.setName('股溝');
+	if (process.platform === 'darwin') {
+		app.dock.setIcon(nativeImage.createFromPath(`${app.getAppPath()}/public/image/stock_64.png`));
+	}
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;
-	const R = require('ramda');
-
 	createWindow();
 	const stockCodes = await db.stockCodes.getAll();
-	const stockInfos = await db.stockInfos.getAll();
-	console.log(stockInfos);
 	if (R.isEmpty(stockCodes)) {
 		const stockList = await twStockCrawler.getStockCode();
 		await db.stockCodes.create(stockList);
@@ -70,15 +76,6 @@ app.on('activate', () => {
 	if (!mainWindow) createWindow();
 });
 
-ipcMain.handle('getStockCode', async () => {
-	return await db.stockCodes.getAll();
-});
-
-ipcMain.handle('initStockInfo', async (event, { code, days }) => {
-	const stockInfoList = await twStockCrawler.getStockInfo(code, days);
-	return stockInfoList;
-});
-
 ipcMain.on('minimize', () => {
 	const win = BrowserWindow.getFocusedWindow();
 	win.minimize();
@@ -90,4 +87,9 @@ ipcMain.on('maximize', () => {
 ipcMain.on('close', () => {
 	const win = BrowserWindow.getFocusedWindow();
 	win.close();
+});
+
+ipcMain.handle('initStockInfo', async (event, { code, days }) => {
+	const stockInfoList = await twStockCrawler.getStockInfo(code, days);
+	return stockInfoList;
 });
