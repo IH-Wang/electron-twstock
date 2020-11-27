@@ -21,30 +21,34 @@
 	};
 </script>
 
-<header class="{styled.titleBar}">
-	<div class="{styled.titleLogo}"><img src="image/stock.png" alt="logo" /><span>股溝</span></div>
+<div class="{styled.titleBar}">
+	<header class="flex mx-auto px-3 justify-between items-center">
+		<div class="{styled.titleLogo}"><img src="image/stock.png" alt="logo" /><span>股溝</span></div>
 
-	<nav class="{styled.titleControl}">
-		<ul>
-			<li class="{styled.darkMode}">
-				<FormField>
-					<Switch bind:checked="{toggleSelect}" on:click="{toggle}" />
-					<i class="material-icons {styled.darkModeIcon}">{!toggleSelect ? 'nights_stay' : 'wb_sunny'}</i>
-				</FormField>
-			</li>
-			<li>
-				<button class="{styled.titleButton}" on:click="{minimize}">
-					<i class="material-icons">minimize</i>
-				</button>
-			</li>
-			<li>
-				<button class="{styled.titleButton}" on:click="{maximize}">
-					<i class="material-icons">open_in_full</i>
-				</button>
-			</li>
-			<li>
-				<button class="{styled.titleButton}" on:click="{close}"> <i class="material-icons">close</i> </button>
-			</li>
-		</ul>
-	</nav>
-</header>
+		<nav class="{styled.titleControl}">
+			<ul>
+				<li class="{styled.darkMode}">
+					<FormField>
+						<Switch bind:checked="{toggleSelect}" on:click="{toggle}" />
+						<i class="material-icons {styled.darkModeIcon}">{!toggleSelect ? 'nights_stay' : 'wb_sunny'}</i>
+					</FormField>
+				</li>
+				<li class="ml-4">
+					<button class="{styled.titleButton} focus:outline-none" on:click="{minimize}">
+						<i class="material-icons">minimize</i>
+					</button>
+				</li>
+				<li class="ml-4">
+					<button class="{styled.titleButton} focus:outline-none" on:click="{maximize}">
+						<i class="material-icons">open_in_full</i>
+					</button>
+				</li>
+				<li class="ml-4">
+					<button class="{styled.titleButton} focus:outline-none" on:click="{close}">
+						<i class="material-icons">close</i>
+					</button>
+				</li>
+			</ul>
+		</nav>
+	</header>
+</div>

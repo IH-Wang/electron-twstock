@@ -1,14 +1,14 @@
 .titleBar {
 	-webkit-app-region: drag;
 	-webkit-user-select: none;
-	display: flex;
 	width: 100%;
 	height: 40px;
 	background: var(--theme-titleBarBG);
 	cursor: pointer;
-	align-items: center;
-	justify-content: space-around;
-	flex-wrap: wrap;
+	header {
+		height: inherit;
+		flex-wrap: wrap;
+	}
 }
 .titleLogo {
 	display: flex;

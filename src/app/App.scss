@@ -5,6 +5,7 @@ main {
 	font-size: 1em;
 	font-family: 'Comic Sans MS';
 	font-weight: 700;
+	overflow-y: hidden;
 }
 main {
 	height: calc(100vh-50px);
@@ -19,7 +20,7 @@ h1 {
 	}
 }
 
-.pegeWrapper {
+.pageWrapper {
 	display: flex;
 	height: inherit;
 	align-items: center;

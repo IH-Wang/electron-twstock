@@ -1,8 +1,14 @@
-<style>
+<style global>
 	:global(html) {
 		background-color: var(--theme-background);
 		color: var(--theme-text);
 	}
+
+	/* purgecss start ignore */
+	@tailwind base;
+	@tailwind components;
+	/* purgecss end ignore */
+	@tailwind utilities;
 </style>
 
 <script>

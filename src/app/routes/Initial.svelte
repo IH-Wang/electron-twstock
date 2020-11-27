@@ -24,7 +24,7 @@
 	});
 </script>
 
-<div class="pegeWrapper">
+<div class="pageWrapper">
 	{#if isStockCodeChecking}
 		<Wave />
 		<div>
