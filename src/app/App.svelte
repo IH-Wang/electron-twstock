@@ -15,14 +15,23 @@
 	// routes
 	import routes from './routes';
 	// css
-	import './App.module.scss';
+	import './App.scss';
+
+	function conditionsFailed(event) {
+		console.error('conditionsFailed event', event.detail);
+	}
+
+	// Handles the "routeLoaded" event dispatched by the router when a component was loaded
+	function routeLoaded(event) {
+		console.log('routeLoaded event', event.detail);
+	}
 </script>
 
 <ThemeContext>
 	<Header />
 	<main>
 		<DatabaseContext>
-			<Router routes="{routes}" />
+			<Router routes="{routes}" on:conditionsFailed="{conditionsFailed}" on:routeLoaded="{routeLoaded}" />
 		</DatabaseContext>
 	</main>
 </ThemeContext>

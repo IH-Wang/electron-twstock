@@ -7,7 +7,9 @@ export const themes = [
 			titleBarBG: '#C7DAF2',
 			titleBarText: '#333',
 			titleBarSwitchBG: 'aliceblue',
-			titleBarSwitchText: '282230',
+			titleBarSwitchText: '#282230',
+			progressCircleBG: '#e5e5e5',
+			progressCircleBar: '#7ea9e1',
 		},
 	},
 	{
@@ -19,6 +21,8 @@ export const themes = [
 			titleBarText: '#f1f1f1',
 			titleBarSwitchBG: '#888',
 			titleBarSwitchText: '#f1f1f1',
+			progressCircleBG: '#e5e5e5',
+			progressCircleBar: 'tomato',
 		},
 	},
 ];

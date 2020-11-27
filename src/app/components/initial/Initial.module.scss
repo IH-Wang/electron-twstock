@@ -1,0 +1,14 @@
+.stockWrapper {
+	width: 100%;
+}
+
+.stockWrapper,
+.info {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.memo {
+	font-size: 0.8em;
+	color: #aaa;
+}

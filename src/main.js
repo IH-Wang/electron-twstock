@@ -3,15 +3,15 @@ const { app, BrowserWindow, Menu, screen, ipcMain, nativeImage } = require('elec
 const path = require('path');
 const R = require('ramda');
 const fs = require('fs');
-require('electron-reload')(__dirname);
-const db = require('./db/db');
-const twStockCrawler = require('./public/util/crawler');
+require('electron-reload')(`${app.getAppPath()}/public/build/`);
+const db = require('../db/db');
+const twStockCrawler = require('../public/util/crawler');
 global.db = db;
 
 let mainWindow;
 function createWindow() {
 	const timer = setInterval(() => {
-		if (fs.existsSync('./public/build/bundle.js')) {
+		if (fs.existsSync(`${app.getAppPath()}/public/build/bundle.js`)) {
 			clearInterval(timer);
 
 			// Create the browser window.
@@ -21,11 +21,11 @@ function createWindow() {
 				width: width / 1.1,
 				height: height / 1.1,
 				title: '股溝',
-				icon: `${__dirname}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'icns'}`,
+				icon: `${app.getAppPath()}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'icns'}`,
 				webPreferences: {
 					nodeIntegration: true,
 					enableRemoteModule: true,
-					preload: path.join(__dirname, 'preload.js'),
+					preload: path.join(app.getAppPath(), 'src/preload.js'),
 				},
 				frame: false, // 標題列顯示
 				transparent: false, // 背景透明
@@ -42,7 +42,7 @@ function createWindow() {
 				mainWindow.hide();
 			});
 
-			mainWindow.loadFile('public/index.html');
+			mainWindow.loadFile(`${app.getAppPath()}/public/index.html`);
 			if (process.env.NODE_ENV === 'dev') {
 				mainWindow.webContents.openDevTools();
 			}
@@ -90,6 +90,9 @@ ipcMain.on('close', () => {
 });
 
 ipcMain.handle('initStockInfo', async (event, { code, days }) => {
-	const stockInfoList = await twStockCrawler.getStockInfo(code, days);
+	const stockInfoList = await twStockCrawler.getStockInfo(code, days).catch((error) => {
+		console.error(error);
+		window.location.reload();
+	});
 	return stockInfoList;
 });

@@ -11,7 +11,7 @@ const production = !process.env.ROLLUP_WATCH;
 export default {
 	input: 'src/app.js',
 	output: {
-		sourcemap: false,
+		sourcemap: true,
 		format: 'iife',
 		name: 'app',
 		file: 'public/build/bundle.js',
@@ -38,6 +38,7 @@ export default {
 			extensions: ['.svelte', '.js'],
 			dedupe: ['svelte'],
 		}),
+
 		commonjs(),
 		json(),
 

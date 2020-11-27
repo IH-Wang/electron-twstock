@@ -18,3 +18,11 @@ h1 {
 		font-size: 2em;
 	}
 }
+
+.pegeWrapper {
+	display: flex;
+	height: inherit;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}

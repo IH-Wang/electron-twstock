@@ -1,13 +1,9 @@
 import * as ramda from 'ramda';
-
-const DAYS = [3, 5, 10, 20, 60, 120];
+import { numRound } from '../math';
+export const DAYS = [3, 5, 10, 20, 60, 120];
 const movingAverage = (data, days) => {
 	const movingList = data.slice(days * -1);
 	return numRound(ramda.mean(movingList), 2);
-};
-const numRound = (number, round) => {
-	const pow = Math.pow(10, round);
-	return Math.round(number * pow) / pow;
 };
 
 const getNDayAgoStock = (list, days) => {
@@ -99,7 +95,6 @@ class StockUtil {
 			riseDropPrice: numRound(endPrice - refPrice, 2),
 			riseDropMargin: numRound(((endPrice - refPrice) / refPrice) * 100, 2),
 			priceAmplitude,
-			days: DAYS,
 			riseDropDays: {
 				price: DAYS.map((day) => numRound(endPrice - getNDayAgoStock(endPriceList, day), 2)),
 				margin: DAYS.map((day) =>
