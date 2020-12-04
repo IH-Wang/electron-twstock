@@ -158,9 +158,9 @@ class StockUtil {
 			// 前N日之成交量
 			const calcVol = getNDayAgoStock(volList, i);
 			// 5日均量
-			const calcVol5MA = numRound((movingAverage(volList.slice(-i), 5), 2));
+			const calcVol5MA = numRound(movingAverage(volList.slice(-i), 5), 2);
 			// 5MA
-			const calcPrice5MA = numRound((movingAverage(endPriceList.slice(-i), 5), 2));
+			const calcPrice5MA = numRound(movingAverage(endPriceList.slice(-i), 5), 2);
 			// 跌破過五日線
 			isDrop5MA = calcPrice < calcPrice5MA;
 			/*
@@ -200,7 +200,7 @@ class StockUtil {
 			// 判斷是否為旗型末端
 			if (flagLevel > 0 && flagLevel < 99 && !isDrop5MA) {
 				// 當日收盤仍需在五日線上
-				if (priceNext5MA * 1.015 > price && price >= numRound((movingAverage(endPriceList, 5), 2))) {
+				if (priceNext5MA * 1.015 > price && price >= numRound(movingAverage(endPriceList, 5), 2)) {
 					isFlagEnd = true;
 				}
 				flagVolRatio = vol / calcVol;
@@ -224,10 +224,10 @@ class StockUtil {
 		const volList = stockList.map((stock) => stock.vol);
 		const priceList = stockList.map((stock) => stock.endPrice);
 		const maxPriceList = stockList.map((stock) => stock.maxPrice);
-		const vol10MA = numRound((movingAverage(volList, 10), 2));
-		const price5MA = numRound((movingAverage(priceList, 5), 2));
-		const price10MA = numRound((movingAverage(priceList, 10), 2));
-		const price20MA = numRound((movingAverage(priceList, 20), 2));
+		const vol10MA = numRound(movingAverage(volList, 10), 2);
+		const price5MA = numRound(movingAverage(priceList, 5), 2);
+		const price10MA = numRound(movingAverage(priceList, 10), 2);
+		const price20MA = numRound(movingAverage(priceList, 20), 2);
 		// 最高價至前一日跌幅需超過5%才算
 		if ((maxPrice - preMaxPrice) / maxPrice < 0.05) {
 			return reverseInfo;

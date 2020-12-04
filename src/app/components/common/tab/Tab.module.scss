@@ -1,0 +1,26 @@
+.tab {
+	:first-child {
+		a {
+			border-radius: 1em 0 0 1em;
+		}
+	}
+	:last-child {
+		a {
+			border-radius: 0 1em 1em 0;
+		}
+	}
+	li:hover {
+		cursor: pointer;
+	}
+	li {
+		a {
+			background-color: var(--theme-titleBarBG);
+		}
+		.active {
+			background-color: var(--theme-progressCircleBar);
+		}
+	}
+	:not(:last-child) {
+		border-right: 1px solid #eee;
+	}
+}

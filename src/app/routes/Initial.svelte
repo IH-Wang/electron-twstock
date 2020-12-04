@@ -6,6 +6,7 @@
 	import { Wave } from 'svelte-loading-spinners';
 	import * as R from 'ramda';
 	import Stock from '../components/initial/Stock.svelte';
+
 	const db = getContext('db');
 	let isStockCodeChecking = true;
 	let stockCodeList = [];
@@ -16,9 +17,9 @@
 		const checkTimer = setInterval(async () => {
 			const stockCodes = await store.stockCodes.getAll();
 			if (!R.isEmpty(stockCodes)) {
-				clearInterval(checkTimer);
 				stockCodeList = stockCodes.sort((x, y) => x.code - y.code);
 				isStockCodeChecking = false;
+				clearInterval(checkTimer);
 			}
 		}, 500);
 	});

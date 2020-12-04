@@ -11,7 +11,7 @@
 	import * as R from 'ramda';
 	import { fade } from 'svelte/transition';
 	import { push } from 'svelte-spa-router';
-	import { format } from 'date-fns';
+	// import { format, differenceInDays } from 'date-fns';
 
 	// component
 	import ProgressBar from '../common/progressBar/Circle.svelte';
@@ -46,12 +46,21 @@
 			stockCode = { code, name, category, marketType };
 			// db table 沒有才去爬資料
 			if (R.isNil(stockInfoList.find((stock) => stock.code === code))) {
-				const stockInfoRes = await window.ipcRenderer.invoke('initStockInfo', { code, days: 121 });
+				const stockInfoRes = await window.ipcRenderer
+					.invoke('initStockInfo', { code, days: 121 })
+					.catch((error) => {
+						console.error(error);
+						window.location.reload();
+					});
 				if (!R.isEmpty(stockInfoRes)) {
 					const stockInfo = stockInfoRes.slice(-1)[0];
 					await db.stockInfos.create({
 						code,
+						name,
+						category,
+						marketType,
 						date: stockInfo.date,
+						sortPriority: !category ? 99 : 0,
 						priceInfo: stockUtil.getPriceInfo(stockInfo, stockInfoRes),
 						volInfo: stockUtil.getVolInfo(stockInfo, stockInfoRes),
 						flagInfo: stockUtil.getStockFlagType(stockInfo, stockInfoRes),
@@ -81,15 +90,7 @@
 		db = await db.store;
 		stockInfoList = await db.stockInfos.getAll();
 		if (stockInfoList.length === totalStocks) {
-			const checkDate = stockInfoList[0].date;
-			const checkTime = format(new Date(), 'yyyy/MM/dd');
-			// 開啟時間超過當天晚上六點半且 db table 資料日期不是當天的, 就抓取當天的
-			if (new Date().valueOf() > new Date(`${checkTime} 18:30:00`).valueOf() && checkDate !== checkTime) {
-				await db.stockInfos.removeAll();
-				initStockInfo(0);
-			} else {
-				percent.set(100);
-			}
+			percent.set(100);
 		} else {
 			initStockInfo(0);
 		}

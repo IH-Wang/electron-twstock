@@ -1,6 +1,6 @@
 {
   "name": "electron-svelte-demo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A Taiwan stock desktop application with Electron & Svelte",
   "main": "src/main.js",
   "scripts": {
@@ -58,10 +58,6 @@
   },
   "dependencies": {
     "@electron/remote": "^1.0.0",
-    "@smui/data-table": "^1.0.0",
-    "@smui/form-field": "^1.0.0",
-    "@smui/paper": "^1.0.0",
-    "@smui/switch": "^1.0.0",
     "axios": "^0.21.0",
     "cheerio": "^1.0.0-rc.3",
     "cross-env": "^7.0.2",

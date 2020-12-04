@@ -20,7 +20,7 @@ class StockInfoStore {
 		return await this.db.remove({ code }, {});
 	}
 	async removeAll() {
-		this.db.remove({}, { multi: true });
+		return await this.db.remove({}, { multi: true });
 	}
 }
 module.exports = new StockInfoStore();

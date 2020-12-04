@@ -1,23 +1,24 @@
 <script>
 	import { getContext } from 'svelte';
-	import Switch from '@smui/switch';
-	import FormField from '@smui/form-field';
 	import styled from './Header.module.scss';
+
+	import Toggle from '../common/button/Toggle.svelte';
 
 	const { toggle } = getContext('theme');
 	let toggleSelect = false;
 
 	let minimize = () => {
 		window.ipcRenderer.send('minimize');
-		// const result = await window.ipcRenderer.invoke('getStockCode');
 	};
 	let maximize = () => {
 		window.ipcRenderer.send('maximize');
-		// const result = await window.ipcRenderer.invoke('getStockCode');
 	};
 	let close = () => {
 		window.ipcRenderer.send('close');
-		// const result = await window.ipcRenderer.invoke('getStockCode');
+	};
+	const handleToggle = () => {
+		toggle();
+		toggleSelect = !toggleSelect;
 	};
 </script>
 
@@ -28,10 +29,11 @@
 		<nav class="{styled.titleControl}">
 			<ul>
 				<li class="{styled.darkMode}">
-					<FormField>
-						<Switch bind:checked="{toggleSelect}" on:click="{toggle}" />
+					<div class="inline-flex items-center">
+						<Toggle isToggle="{toggleSelect}" toggle="{handleToggle}" />
+						<!-- <Switch bind:checked="{toggleSelect}" on:click="{toggle}" /> -->
 						<i class="material-icons {styled.darkModeIcon}">{!toggleSelect ? 'nights_stay' : 'wb_sunny'}</i>
-					</FormField>
+					</div>
 				</li>
 				<li class="ml-4">
 					<button class="{styled.titleButton} focus:outline-none" on:click="{minimize}">

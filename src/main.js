@@ -3,6 +3,8 @@ const { app, BrowserWindow, Menu, screen, ipcMain, nativeImage } = require('elec
 const path = require('path');
 const R = require('ramda');
 const fs = require('fs');
+const { format, differenceInDays } = require('date-fns');
+
 require('electron-reload')(`${app.getAppPath()}/public/build/`);
 const db = require('../db/db');
 const twStockCrawler = require('../public/util/crawler');
@@ -18,8 +20,8 @@ function createWindow() {
 			const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 			Menu.setApplicationMenu(false);
 			mainWindow = new BrowserWindow({
-				width: width / 1.1,
-				height: height / 1.1,
+				width: width / 1.05,
+				height: height / 1.05,
 				title: '股溝',
 				icon: `${app.getAppPath()}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'icns'}`,
 				webPreferences: {
@@ -59,12 +61,9 @@ app.on('ready', async () => {
 		app.dock.setIcon(nativeImage.createFromPath(`${app.getAppPath()}/public/image/stock_64.png`));
 	}
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;
+	await initialStockCode();
+	await checkStockInfoList();
 	createWindow();
-	const stockCodes = await db.stockCodes.getAll();
-	if (R.isEmpty(stockCodes)) {
-		const stockList = await twStockCrawler.getStockCode();
-		await db.stockCodes.create(stockList);
-	}
 });
 
 app.on('window-all-closed', () => {
@@ -91,8 +90,33 @@ ipcMain.on('close', () => {
 
 ipcMain.handle('initStockInfo', async (event, { code, days }) => {
 	const stockInfoList = await twStockCrawler.getStockInfo(code, days).catch((error) => {
-		console.error(error);
-		window.location.reload();
+		throw error;
 	});
 	return stockInfoList;
 });
+
+async function initialStockCode() {
+	const stockCodes = await db.stockCodes.getAll();
+	if (R.isEmpty(stockCodes)) {
+		const stockList = await twStockCrawler.getStockCode();
+		await db.stockCodes.create(stockList);
+	}
+}
+
+async function checkStockInfoList() {
+	const stockInfoList = await db.stockInfos.getAll();
+	const checkDate = stockInfoList.length > 0 && stockInfoList[0].date;
+	const checkTime = format(new Date(), 'yyyy/MM/dd');
+	// const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
+	const checkDiffDays = differenceInDays(new Date(checkTime), new Date(checkDate));
+	// 開啟時間超過當天晚上六點半且 db table 資料日期不是當天的, 就抓取當天的
+	if (
+		checkDiffDays > 1 ||
+		(new Date().valueOf() > new Date(`${checkTime} 18:30:00`).valueOf() && checkDiffDays === 1)
+	) {
+		const newStockInfoList = await twStockCrawler.getStockInfo(2330, 1);
+		if (newStockInfoList[0].date !== checkDate) {
+			fs.writeFileSync(`${app.getAppPath()}/db/tables/stockInfos.db`, '');
+		}
+	}
+}

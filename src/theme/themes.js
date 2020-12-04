@@ -10,6 +10,7 @@ export const themes = [
 			titleBarSwitchText: '#282230',
 			progressCircleBG: '#e5e5e5',
 			progressCircleBar: '#7ea9e1',
+			inputFocusBorder: '#C7DAF2',
 		},
 	},
 	{
@@ -17,12 +18,13 @@ export const themes = [
 		colors: {
 			text: '#f1f1f1',
 			background: '#27323a',
-			titleBarBG: '#333',
+			titleBarBG: '#444',
 			titleBarText: '#f1f1f1',
 			titleBarSwitchBG: '#888',
 			titleBarSwitchText: '#f1f1f1',
 			progressCircleBG: '#e5e5e5',
 			progressCircleBar: 'tomato',
+			inputFocusBorder: 'tomato',
 		},
 	},
 ];

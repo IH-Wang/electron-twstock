@@ -4,8 +4,10 @@
 
 .tableHeader {
 	background-color: var(--theme-titleBarBG);
-	> tr > th {
+	th {
 		color: var(--theme-titleBarText);
 		font-weight: bolder;
+		font-size: 0.8em;
+		min-width: 6em;
 	}
 }
