@@ -1,13 +1,13 @@
 # 股溝桌面應用程式
 
-因為懶得架資料庫跟 server, 只好開發一個桌面應用程式,
-讓自己能方便看的台股盤後快速篩選工具, 順便玩一下 svelte,
-使用技術如下:
+有鑒於大多數看盤軟體不支援 mac,而且自己因為懶得架資料庫跟 server,  
+只好開發一個桌面應用程式, 讓自己能方便看的台股盤後快速篩選工具,  
+順便玩一下 svelte, 使用技術如下:
 
-封裝 - Electron.js,
-前端 - Svelte.js, Tailwind.css
-爬蟲 - axios + cheerio
-資料 - ne-db
+-   封裝: Electron.js,
+-   前端: Svelte.js, Tailwind.css
+-   爬蟲: axios + cheerio
+-   資料: ne-db
 
 ## Screenshot
 
@@ -25,18 +25,19 @@
 
 1. mac 上方 menu 顯示調整
 2. 右鍵點 icon 顯示調整
+3. 打包封裝
 
 ## Run
 
 (mac)
 
-```
+```mac
 yarn start
 ```
 
 (windows)
 
-```
+```windows
 yarn start:windows
 ```
 
@@ -55,3 +56,5 @@ v0.1.5 - 下載 excel 報表功能
 v0.2 - TBD
 
 歡迎提出 issue
+
+**(最後，感謝主力大 Nick 的策略教學)**

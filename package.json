@@ -1,5 +1,5 @@
 {
-  "name": "electron-svelte-demo",
+  "name": "electron-twstock",
   "version": "0.0.2",
   "description": "A Taiwan stock desktop application with Electron & Svelte",
   "main": "src/main.js",
@@ -17,7 +17,7 @@
     "format": "prettier --write '{public,src}/**/*.{css,html,js,svelte}'",
     "lint": "eslint --fix --quiet src --ext .js,.svelte"
   },
-  "repository": "https://github.com/IH-Wang/electron-svelte-demo",
+  "repository": "https://github.com/IH-Wang/electron-twstock",
   "keywords": [
     "Electron",
     "Svelte",
