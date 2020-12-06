@@ -4,13 +4,19 @@ const path = require('path');
 const R = require('ramda');
 const fs = require('fs');
 const { format, differenceInDays } = require('date-fns');
+if (process.env.NODE_ENV === 'dev') {
+	require('electron-reload')(`${app.getAppPath()}/public/build/`, {
+		electron: `${app.getAppPath()}/node_modules', '.bin', 'electron')`,
+		awaitWriteFinish: true,
+	});
+}
 
-require('electron-reload')(`${app.getAppPath()}/public/build/`);
 const db = require('../db/db');
 const twStockCrawler = require('../public/util/crawler');
 global.db = db;
 
 let mainWindow;
+app.setName('股溝');
 function createWindow() {
 	const timer = setInterval(() => {
 		if (fs.existsSync(`${app.getAppPath()}/public/build/bundle.js`)) {
@@ -18,7 +24,35 @@ function createWindow() {
 
 			// Create the browser window.
 			const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-			Menu.setApplicationMenu(false);
+			if (process.platform === 'darwin') {
+				const template = [];
+				template.unshift({
+					label: app.getName(),
+					submenu: [
+						{
+							label: '結束',
+							accelerator: 'CmdOrCtrl+Q',
+							click() {
+								app.quit();
+							},
+						},
+					],
+				});
+				Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+				// app.dock.setMenu(
+				// 	Menu.buildFromTemplate([
+				// 		{
+				// 			label: 'Quit',
+				// 			click() {
+				// 				app.quit();
+				// 			},
+				// 		},
+				// 	]),
+				// );
+			} else {
+				Menu.setApplicationMenu(false);
+			}
+
 			mainWindow = new BrowserWindow({
 				width: width / 1.05,
 				height: height / 1.05,
@@ -55,8 +89,8 @@ function createWindow() {
 		}
 	}, 500);
 }
+
 app.on('ready', async () => {
-	app.setName('股溝');
 	if (process.platform === 'darwin') {
 		app.dock.setIcon(nativeImage.createFromPath(`${app.getAppPath()}/public/image/stock_64.png`));
 	}

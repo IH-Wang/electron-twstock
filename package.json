@@ -12,6 +12,8 @@
     "clean": "rm -rf ./public/build",
     "clean:windows": " if exist \"public/build\" rd /s /q \"public/build\"",
     "postinstall": "cross-env NODE_ENV=prod electron-builder install-app-deps",
+    "package:forge": "electron-forge package",
+    "make": "electron-forge make",
     "package": "electron-packager . --out=dist --ignore=src --ignore=rollup.config.js --ignore=.gitignore --overwrite",
     "package:windows": "node ./build.js",
     "format": "prettier --write '{public,src}/**/*.{css,html,js,svelte}'",
@@ -26,7 +28,12 @@
   ],
   "author": "IH-Wang",
   "license": "MIT",
+  "config": {
+    "forge": "./forge.config.js"
+  },
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^10.0.0",

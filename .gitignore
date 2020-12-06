@@ -5,3 +5,4 @@ yarn.lock
 .DS_Store
 /db/tables/
 /build/
+/out/

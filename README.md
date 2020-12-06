@@ -51,10 +51,10 @@ MIT
 
 ## roadmap
 
-v0.1 - 打包成 windows & mac 桌面程式
-v0.1.5 - 下載 excel 報表功能
-v0.2 - TBD
+-   v0.1 - 打包成 windows & mac 桌面程式
+-   v0.1.5 - 下載 excel 報表功能
+-   v0.2 - TBD
 
 歡迎提出 issue
 
-**(最後，感謝主力大 Nick 的策略教學)**
+**(最後，感謝找到主力發現獲利的主力大 Nick 的策略教學)**

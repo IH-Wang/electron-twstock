@@ -20,6 +20,9 @@
 	import stockUtil from '../../util/stock';
 	import { delay } from '../../util/common';
 
+	// store
+	import MainStore from '../../stores/main';
+
 	// css
 	import styled from './Initial.module.scss';
 
@@ -81,7 +84,11 @@
 			removeCodeList.forEach((code) => {
 				db.stockCodes.remove(code);
 			});
-			push('/main');
+			// if ($percent === 100) {
+			// 	setTimeout(() => {
+			// 		push('/main');
+			// 	}, 1000);
+			// }
 		}
 	};
 
@@ -97,7 +104,10 @@
 	});
 	$: {
 		if ($percent === 100) {
-			push('/main');
+			MainStore.setBaseStockInfoList(stockInfoList);
+			setTimeout(() => {
+				push('/main');
+			}, 2000);
 		}
 	}
 </script>

@@ -9,11 +9,11 @@
 	// store
 	import MainStore from '../stores/main.js';
 
-	let db = getContext('db');
+	// let db = getContext('db');
 	onMount(async () => {
-		db = await db.store;
-		const infoList = await db.stockInfos.getAll();
-		MainStore.setBaseStockInfoList(infoList);
+		// db = await db.store;
+		// const infoList = await db.stockInfos.getAll();
+		// MainStore.setBaseStockInfoList(infoList);
 	});
 	onDestroy(() => {
 		MainStore.reset();

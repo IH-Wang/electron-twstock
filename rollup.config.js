@@ -11,7 +11,7 @@ const production = !process.env.ROLLUP_WATCH;
 export default {
 	input: 'src/app.js',
 	output: {
-		sourcemap: true,
+		sourcemap: false,
 		format: 'iife',
 		name: 'app',
 		file: 'public/build/bundle.js',
