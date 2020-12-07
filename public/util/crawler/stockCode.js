@@ -36,12 +36,12 @@ const evaluate = ($) => {
 };
 
 const getStockCodes = async () => {
-	const [twseRes, otcRes, emergingRes] = await Promise.all([
+	const [twseRes, otcRes] = await Promise.all([
 		await stockCrawler(TWSE_URL, evaluate),
 		await stockCrawler(OTC_URL, evaluate),
 		// await stockCrawler(EMERGING_URL, evaluate),
 	]);
-	const stockList = [...twseRes, ...otcRes, ...emergingRes];
+	const stockList = [...twseRes, ...otcRes];
 	return stockList.filter((stock) => stock.name.indexOf('　') === -1);
 };
 module.exports = getStockCodes;

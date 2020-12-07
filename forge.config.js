@@ -6,6 +6,8 @@ module.exports = {
 	},
 	packagerConfig: {
 		icon: 'public/image/icon/stock.icns',
+		executableName: 'electron-twstock',
+		appVersion: '0.1',
 	},
 	electronRebuildConfig: {},
 	makers: [
@@ -19,9 +21,13 @@ module.exports = {
 			name: '@electron-forge/maker-zip',
 			platforms: ['darwin'],
 		},
+		{
+			name: '@electron-forge/maker-dmg',
+			platforms: ['darwin'],
+		},
 	],
 	publishers: [],
 	plugins: [],
 	hooks: {},
-	buildIdentifier: 'electron-twstock',
+	buildIdentifier: process.env.IS_BETA ? 'beta' : 'prod',
 };

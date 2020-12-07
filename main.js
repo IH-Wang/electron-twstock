@@ -1,9 +1,7 @@
 'use strict';
 const { app, BrowserWindow, Menu, screen, ipcMain, nativeImage } = require('electron');
 const path = require('path');
-const R = require('ramda');
 const fs = require('fs');
-const { format, differenceInDays } = require('date-fns');
 if (process.env.NODE_ENV === 'dev') {
 	require('electron-reload')(`${app.getAppPath()}/public/build/`, {
 		electron: `${app.getAppPath()}/node_modules', '.bin', 'electron')`,
@@ -11,9 +9,7 @@ if (process.env.NODE_ENV === 'dev') {
 	});
 }
 
-const db = require('../db/db');
-const twStockCrawler = require('../public/util/crawler');
-global.db = db;
+const twStockCrawler = require(`${app.getAppPath()}/public/util/crawler`);
 
 let mainWindow;
 app.setName('股溝');
@@ -60,8 +56,7 @@ function createWindow() {
 				icon: `${app.getAppPath()}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'icns'}`,
 				webPreferences: {
 					nodeIntegration: true,
-					enableRemoteModule: true,
-					preload: path.join(app.getAppPath(), 'src/preload.js'),
+					preload: path.join(app.getAppPath(), '/preload.js'),
 				},
 				frame: false, // 標題列顯示
 				transparent: false, // 背景透明
@@ -95,12 +90,11 @@ app.on('ready', async () => {
 		app.dock.setIcon(nativeImage.createFromPath(`${app.getAppPath()}/public/image/stock_64.png`));
 	}
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;
-	await initialStockCode();
-	await checkStockInfoList();
 	createWindow();
 });
 
 app.on('window-all-closed', () => {
+	mainWindow.destroy();
 	app.quit();
 });
 app.on('activate', () => {
@@ -118,8 +112,15 @@ ipcMain.on('maximize', () => {
 	win.setFullScreen(!win.isFullScreen());
 });
 ipcMain.on('close', () => {
-	const win = BrowserWindow.getFocusedWindow();
-	win.close();
+	mainWindow.removeAllListeners('close');
+	mainWindow.close();
+});
+
+ipcMain.handle('initStockCode', async () => {
+	const stockCodeList = await twStockCrawler.getStockCode().catch((error) => {
+		throw error;
+	});
+	return stockCodeList;
 });
 
 ipcMain.handle('initStockInfo', async (event, { code, days }) => {
@@ -128,29 +129,3 @@ ipcMain.handle('initStockInfo', async (event, { code, days }) => {
 	});
 	return stockInfoList;
 });
-
-async function initialStockCode() {
-	const stockCodes = await db.stockCodes.getAll();
-	if (R.isEmpty(stockCodes)) {
-		const stockList = await twStockCrawler.getStockCode();
-		await db.stockCodes.create(stockList);
-	}
-}
-
-async function checkStockInfoList() {
-	const stockInfoList = await db.stockInfos.getAll();
-	const checkDate = stockInfoList.length > 0 && stockInfoList[0].date;
-	const checkTime = format(new Date(), 'yyyy/MM/dd');
-	// const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
-	const checkDiffDays = differenceInDays(new Date(checkTime), new Date(checkDate));
-	// 開啟時間超過當天晚上六點半且 db table 資料日期不是當天的, 就抓取當天的
-	if (
-		checkDiffDays > 1 ||
-		(new Date().valueOf() > new Date(`${checkTime} 18:30:00`).valueOf() && checkDiffDays === 1)
-	) {
-		const newStockInfoList = await twStockCrawler.getStockInfo(2330, 1);
-		if (newStockInfoList[0].date !== checkDate) {
-			fs.writeFileSync(`${app.getAppPath()}/db/tables/stockInfos.db`, '');
-		}
-	}
-}

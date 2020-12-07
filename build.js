@@ -7,14 +7,16 @@ builder
 
 		win: ['nsis', 'portable'], // nsis . portable
 		config: {
-			appId: 'com.andrewdeveloper.electron.cat',
-			productName: '小貓玩耍',
+			appId: 'com.electron.twstock',
+			productName: '股溝',
 			directories: {
 				output: 'build/win',
 			},
 			win: {
-				icon: '',
+				icon: './public/image/stock_256.png',
 			},
+			files: ['public/**/*', 'main.js', 'preload.js'],
+			// asar: false,
 		},
 	})
 	.then(

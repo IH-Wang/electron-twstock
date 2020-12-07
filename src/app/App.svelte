@@ -5,10 +5,10 @@
 	}
 
 	/* purgecss start ignore */
-	@tailwind base;
-	@tailwind components;
+	/* @tailwind base; */
+	/* @tailwind components; */
 	/* purgecss end ignore */
-	@tailwind utilities;
+	/* @tailwind utilities; */
 </style>
 
 <script>
