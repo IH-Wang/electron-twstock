@@ -117,6 +117,7 @@
 		stockInfoList = await dbUtil.getAllItems(db, DB_STOCK_INFO);
 		if (stockInfoList.length === totalStocks) {
 			const isNewDate = await checkStockInfoList(db, stockInfoList[0].date);
+			console.log('isNewDate', isNewDate);
 			isNewDate ? percent.set(100) : initStockInfo(0);
 		} else {
 			initStockInfo(0);

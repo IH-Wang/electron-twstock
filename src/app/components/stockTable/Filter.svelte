@@ -21,6 +21,10 @@
 		rise: '漲幅',
 		drop: '跌幅',
 	};
+	const filterMaxMinTabs = {
+		max: '新高',
+		min: '新低',
+	};
 	let selectMarketType = '';
 	let selectCategory = -1;
 	let searchText = '';
@@ -33,6 +37,8 @@
 	let activeRiseDropTab = '';
 	let selectedRiseDropIndex = 0;
 	let searchRiseDropMargin;
+	let activeMaxMinTab = '';
+	let selectedMaxMinIndex = 0;
 	// 過濾股號 | 股名
 	const changeText = (evt) => {
 		if (!evt.data || (evt.data.match(/^[\u4e00-\u9fa5a-zA-Z0-9]+$/) && searchText.length > 1)) {
@@ -91,7 +97,7 @@
 	};
 </script>
 
-<div class="w-full flex flex-col px-4 my-4">
+<div class="w-full flex flex-col px-4 my-2">
 	<div class="mt-2 inline-flex">
 		<div class="mr-2">
 			<span>搜尋</span>
@@ -145,41 +151,41 @@
 	</div>
 	{#if activeTab === filterTabOption.priceVol}
 		<div class="mt-2 inline-flex">
-			<div class="mr-2">
-				<span>最高價</span>
-				<input
-					type="number"
-					name="maxPrice"
-					bind:value="{searchMaxPrice}"
-					on:input="{changePrice}"
-					placeholder="當日最高價"
-					class="focus:ring-indigo-500 rounded-md pl-1 w-28 text-center"
-				/>
-			</div>
-			<div class="mx-2">
-				<span>最低價</span>
-				<input
-					type="number"
-					name="minPrice"
-					bind:value="{searchMinPrice}"
-					on:input="{changePrice}"
-					placeholder="當日最低價"
-					class="focus:ring-indigo-500 rounded-md pl-1 w-28 text-center"
-				/>
-			</div>
-			<div class="mx-2">
-				<span>收盤價</span>
-				<input
-					type="number"
-					name="endPrice"
-					bind:value="{searchEndPrice}"
-					on:input="{changePrice}"
-					placeholder="當日收盤價"
-					class="focus:ring-indigo-500 rounded-md pl-1 w-28 text-center"
-				/>
-			</div>
-		</div>
-		<div class="mt-2 inline-flex">
+			<TabPanel title="價格">
+				<div>
+					<span>最高</span>
+					<input
+						type="number"
+						name="maxPrice"
+						bind:value="{searchMaxPrice}"
+						on:input="{changePrice}"
+						placeholder="最高價"
+						class="focus:ring-indigo-500 rounded-md mx-1 w-20 text-center"
+					/>
+				</div>
+				<div class="mt-1">
+					<span>最低</span>
+					<input
+						type="number"
+						name="minPrice"
+						bind:value="{searchMinPrice}"
+						on:input="{changePrice}"
+						placeholder="最低價"
+						class="focus:ring-indigo-500 rounded-md mx-1  w-20 text-center"
+					/>
+				</div>
+				<div class="mt-1">
+					<span>收盤</span>
+					<input
+						type="number"
+						name="endPrice"
+						bind:value="{searchEndPrice}"
+						on:input="{changePrice}"
+						placeholder="收盤價"
+						class="focus:ring-indigo-500 rounded-md mx-1 w-20 text-center"
+					/>
+				</div>
+			</TabPanel>
 			<TabPanel
 				title="漲跌"
 				tabs="{Object.values(filterRiseDropTabs)}"
@@ -194,11 +200,43 @@
 					name="riseDropMargin"
 					bind:value="{searchRiseDropMargin}"
 					placeholder="漲跌"
-					class="focus:ring-indigo-500 rounded-md pl-1 w-24 text-center"
+					class="focus:ring-indigo-500 rounded-md m-1 w-24 text-center"
 					on:change="{changePrice}"
 					disabled="{!activeRiseDropTab}"
 				/>
 				%
+			</TabPanel>
+			<TabPanel
+				title="高低"
+				tabs="{Object.values(filterMaxMinTabs)}"
+				changeTab="{changeTab('maxMin')}"
+				activeTab="{activeMaxMinTab}"
+				options="{DAYS.map((day) => `${day} 日`)}"
+				changeOption="{changeSelect('maxMin')}"
+				selectedOption="{selectedMaxMinIndex}"
+			>
+				<div class="inline-flex mt-1 justify-around w-full">
+					<div>
+						<span>漲停</span>
+						<input
+							name="isLongOrder"
+							type="checkbox"
+							class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+							on:change="{changeFilterCheck}"
+							bind:checked="{isLongOrder}"
+						/>
+					</div>
+					<div>
+						<span>跌停</span>
+						<input
+							name="isLongOrder"
+							type="checkbox"
+							class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+							on:change="{changeFilterCheck}"
+							bind:checked="{isLongOrder}"
+						/>
+					</div>
+				</div>
 			</TabPanel>
 		</div>
 	{:else if activeTab === filterTabOption.strategy}

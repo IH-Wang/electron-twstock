@@ -7,7 +7,7 @@
 -   封裝: Electron.js,
 -   前端: Svelte.js, Tailwind.css
 -   爬蟲: axios + cheerio
--   資料: ne-db
+-   資料: idb(indexedDB)
 
 ## Screenshot
 
@@ -23,9 +23,8 @@
 
 ## 待完成
 
-1. mac 上方 menu 顯示調整
-2. 右鍵點 icon 顯示調整
-3. 打包封裝
+1. 右鍵點 icon 顯示調整
+2. 打包封裝測試
 
 ## Run
 

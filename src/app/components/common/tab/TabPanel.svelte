@@ -19,19 +19,21 @@
 	};
 </script>
 
-<div class="border py-1">
+<div class="{styled.tabPanelWrapper} border shadow py-1 mr-1 text-center">
 	<span>{title}</span>
-	<ul class="{styled.tabPanel} {classProp} list-reset flex">
-		{#each tabs as tab}
-			<li class="p-0 flex-1">
-				<a
-					class="{tab === activeTab ? styled.active : ''} inline-block px-4 text-center"
-					href="{null}"
-					on:click="{() => setTab(tab)}"
-				>{tab}</a>
-			</li>
-		{/each}
-	</ul>
+	{#if !R.isEmpty(tabs)}
+		<ul class="{styled.tabPanel} {classProp} list-reset flex">
+			{#each tabs as tab}
+				<li class="p-0 flex-1">
+					<a
+						class="{tab === activeTab ? styled.active : ''} inline-block px-4 text-center"
+						href="{null}"
+						on:click="{() => setTab(tab)}"
+					>{tab}</a>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 	{#if !R.isEmpty(options)}
 		<div>
 			<select

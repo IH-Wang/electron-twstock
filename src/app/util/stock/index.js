@@ -98,8 +98,16 @@ class StockUtil {
 				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
 			)
 			.every((price) => price < endPrice);
+		// 收盤價在 5, 10, 20 日均線之下
+		const isUnderPrePriceMA = prePriceMA
+			.filter(
+				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
+			)
+			.every((price) => price > endPrice);
 		// 突破均線糾結
 		const isBreakTangled = riseDropMargin > 4 && isOverPrePriceMA && isPreTangledMA;
+		// 跌破均線糾結
+		const isDropTangled = riseDropMargin < -4 && isUnderPrePriceMA && isPreTangledMA;
 		// 判斷多頭排列
 		const isLongOrder =
 			priceMA[DAYS.indexOf(5)] > priceMA[DAYS.indexOf(10)] &&
@@ -130,6 +138,7 @@ class StockUtil {
 			minMA,
 			isTangledMA,
 			isBreakTangled,
+			isDropTangled,
 			isLongOrder,
 			isShortOrder,
 			isLimitUp,
