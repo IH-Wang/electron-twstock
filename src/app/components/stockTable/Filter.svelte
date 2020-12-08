@@ -10,11 +10,16 @@
 	import MainStore from '../../stores/main';
 	// component
 	import Tab from '../common/tab/Tab.svelte';
-	// import Dropdown from '../common/dropdown/Dropdown.svelte';
+	import TabPanel from '../common/tab/TabPanel.svelte';
+	import { DAYS } from '../../util/stock';
 	const filterTabOption = {
 		priceVol: '價量篩選',
 		strategy: '技術篩選',
 		big3: '三大法人',
+	};
+	const filterRiseDropTabs = {
+		rise: '漲幅',
+		drop: '跌幅',
 	};
 	let selectMarketType = '';
 	let selectCategory = -1;
@@ -25,6 +30,9 @@
 	let isLongOrder, isShortOrder;
 	let tabs = Object.values(filterTabOption);
 	let activeTab;
+	let activeRiseDropTab = '';
+	let selectedRiseDropIndex = 0;
+	let searchRiseDropMargin;
 	// 過濾股號 | 股名
 	const changeText = (evt) => {
 		if (!evt.data || (evt.data.match(/^[\u4e00-\u9fa5a-zA-Z0-9]+$/) && searchText.length > 1)) {
@@ -56,8 +64,27 @@
 		activeTab = tabs[0];
 	};
 	// 切換 tab
-	const changeTab = (tab) => {
-		activeTab = tab;
+	const changeTab = (type) => (tab) => {
+		switch (type) {
+			case 'riseDrop':
+				activeRiseDropTab = tab;
+				break;
+			case 'main':
+			default:
+				activeTab = tab;
+				break;
+		}
+	};
+
+	const changeSelect = (type) => (selected) => {
+		switch (type) {
+			case 'riseDrop':
+				console.log(selected);
+				break;
+			case 'main':
+			default:
+				break;
+		}
 	};
 	const changePrice = (evt) => {
 		MainStore.filterByParams({ [evt.target.name]: evt.target.value ? Number(evt.target.value) : '' });
@@ -114,7 +141,7 @@
 		</div>
 	</div>
 	<div class="mt-2">
-		<Tab tabs="{tabs}" bind:activeTab changeTab="{changeTab}" />
+		<Tab tabs="{tabs}" bind:activeTab changeTab="{changeTab('main')}" />
 	</div>
 	{#if activeTab === filterTabOption.priceVol}
 		<div class="mt-2 inline-flex">
@@ -151,6 +178,28 @@
 					class="focus:ring-indigo-500 rounded-md pl-1 w-28 text-center"
 				/>
 			</div>
+		</div>
+		<div class="mt-2 inline-flex">
+			<TabPanel
+				title="漲跌"
+				tabs="{Object.values(filterRiseDropTabs)}"
+				changeTab="{changeTab('riseDrop')}"
+				activeTab="{activeRiseDropTab}"
+				options="{DAYS.map((day) => `${day} 日`)}"
+				changeOption="{changeSelect('riseDrop')}"
+				selectedOption="{selectedRiseDropIndex}"
+			>
+				<input
+					type="number"
+					name="riseDropMargin"
+					bind:value="{searchRiseDropMargin}"
+					placeholder="漲跌"
+					class="focus:ring-indigo-500 rounded-md pl-1 w-24 text-center"
+					on:change="{changePrice}"
+					disabled="{!activeRiseDropTab}"
+				/>
+				%
+			</TabPanel>
 		</div>
 	{:else if activeTab === filterTabOption.strategy}
 		<div class="mt-2 inline-flex">

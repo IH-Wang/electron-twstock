@@ -23,9 +23,6 @@
 	import stockUtil from '../../util/stock';
 	import { delay } from '../../util/common';
 
-	// store
-	import MainStore from '../../stores/main';
-
 	// css
 	import styled from './Initial.module.scss';
 	import dbUtil from '../../util/db';
@@ -105,7 +102,7 @@
 				} else {
 					removeCodeList.push(code);
 				}
-				await delay(200);
+				await delay(300);
 			}
 			percent.set(Math.floor(((index + 1) / totalStocks) * 100));
 			await initStockInfo(index + 1);
@@ -127,10 +124,9 @@
 	});
 	$: {
 		if ($percent === 100) {
-			MainStore.setBaseStockInfoList(stockInfoList);
 			setTimeout(() => {
 				push('/main');
-			}, 1000);
+			}, 500);
 		}
 	}
 </script>

@@ -1,4 +1,5 @@
-.tab {
+.tab,
+.tabPanel {
 	:first-child {
 		a {
 			border-radius: 1em 0 0 1em;
@@ -12,6 +13,11 @@
 	li:hover {
 		cursor: pointer;
 	}
+	:not(:last-child) {
+		border-right: 1px solid #eee;
+	}
+}
+.tab {
 	li {
 		a {
 			background-color: var(--theme-titleBarBG);
@@ -20,7 +26,15 @@
 			background-color: var(--theme-progressCircleBar);
 		}
 	}
-	:not(:last-child) {
-		border-right: 1px solid #eee;
+}
+.tabPanel {
+	li {
+		a {
+			background-color: #fff;
+			color: #333;
+		}
+		.active {
+			background-color: var(--theme-progressCircleBar);
+		}
 	}
 }

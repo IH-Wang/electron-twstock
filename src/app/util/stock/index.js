@@ -1,5 +1,5 @@
 import * as ramda from 'ramda';
-import { numRound } from '../math';
+import { numRound, numFloor } from '../math';
 export const DAYS = [3, 5, 10, 20, 60, 120];
 const movingAverage = (data, days) => {
 	const movingList = data.slice(days * -1);
@@ -72,10 +72,34 @@ class StockUtil {
 		const priceMA = DAYS.map((day) => movingAverage(endPriceList, day));
 		const maxMA = DAYS.map((day) => Math.max(...maxPriceList.slice(-day)));
 		const minMA = DAYS.map((day) => Math.min(...minPriceList.slice(-day)));
-		// 判斷均線糾結
-		const isTangled5MA = riskMA[DAYS.indexOf(5)] >= -2 && riskMA[DAYS.indexOf(5)] <= 3;
-		const isTangled10MA = riskMA[DAYS.indexOf(10)] >= -2 && riskMA[DAYS.indexOf(10)] <= 3;
-		const isTangled20MA = riskMA[DAYS.indexOf(20)] >= -2 && riskMA[DAYS.indexOf(20)] <= 3;
+		// 當日漲跌
+		const riseDropPrice = numRound(endPrice - refPrice, 2);
+		// 當日漲跌幅
+		const riseDropMargin = numRound(((endPrice - refPrice) / refPrice) * 100, 2);
+		// 判斷 5,10,20 日均線糾結
+		const isTangledMA = riskMA
+			.filter(
+				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
+			)
+			.every((risk) => risk >= -2 && risk <= 3);
+		// 判斷前一天 5, 10, 20 日均線糾結
+		const prePriceMA = DAYS.map((day) => movingAverage(endPriceList.slice(0, -1), day));
+		const preRiskMA = DAYS.map((day) =>
+			numRound(((refPrice - movingAverage(endPriceList.slice(0, -1), day)) / refPrice) * 100, 2),
+		);
+		const isPreTangledMA = preRiskMA
+			.filter(
+				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
+			)
+			.every((risk) => risk >= -2 && risk <= 3);
+		// 收盤價在 5, 10, 20 日均線之上
+		const isOverPrePriceMA = prePriceMA
+			.filter(
+				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
+			)
+			.every((price) => price < endPrice);
+		// 突破均線糾結
+		const isBreakTangled = riseDropMargin > 4 && isOverPrePriceMA && isPreTangledMA;
 		// 判斷多頭排列
 		const isLongOrder =
 			priceMA[DAYS.indexOf(5)] > priceMA[DAYS.indexOf(10)] &&
@@ -86,15 +110,30 @@ class StockUtil {
 			priceMA[DAYS.indexOf(5)] < priceMA[DAYS.indexOf(10)] &&
 			priceMA[DAYS.indexOf(10)] < priceMA[DAYS.indexOf(20)] &&
 			priceMA[DAYS.indexOf(20)] < priceMA[DAYS.indexOf(60)];
+		// 判斷漲停
+		const isLimitUp = riseDropPrice > 0 && riseDropPrice === numFloor(refPrice / 10, 2);
+		// 判斷跌停
+		const isLimitDown = riseDropPrice < 0 && Math.abs(riseDropPrice) === numFloor(refPrice / 10, 2);
+
 		return {
 			refPrice,
 			startPrice,
 			endPrice,
 			maxPrice,
 			minPrice,
-			riseDropPrice: numRound(endPrice - refPrice, 2),
-			riseDropMargin: numRound(((endPrice - refPrice) / refPrice) * 100, 2),
+			riseDropPrice,
+			riseDropMargin,
 			priceAmplitude,
+			riskMA,
+			priceMA,
+			maxMA,
+			minMA,
+			isTangledMA,
+			isBreakTangled,
+			isLongOrder,
+			isShortOrder,
+			isLimitUp,
+			isLimitDown,
 			riseDropDays: {
 				price: DAYS.map((day) => numRound(endPrice - getNDayAgoStock(endPriceList, day), 2)),
 				margin: DAYS.map((day) =>
@@ -104,13 +143,6 @@ class StockUtil {
 					),
 				),
 			},
-			riskMA,
-			priceMA,
-			maxMA,
-			minMA,
-			isTangledMA: isTangled5MA && isTangled10MA && isTangled20MA,
-			isLongOrder,
-			isShortOrder,
 		};
 	}
 
@@ -325,6 +357,8 @@ class StockUtil {
 		const sitesList = stockList.map((stock) => stock.sitesNetBuySell);
 		const dealerList = stockList.map((stock) => stock.dealerNetBuySell);
 		const bigThreeList = stockList.map((stock) => stock.bigThreeNetBuySell);
+		const stockInfo4DaysAgo = getNDayAgoStock(stockList, 4);
+		// const foreignHoldingList = stockList.map((stock) => stock.foreignHolding);
 		return {
 			major: {
 				today: majorNetBuySell,
@@ -334,6 +368,7 @@ class StockUtil {
 				total: DAYS.map((day) => ramda.sum(majorList.slice(-day))),
 				daysChange: [],
 				turnPoint: getTurningPoint(majorList),
+				placementStrategy: null,
 			},
 			foreign: {
 				today: foreignNetBuySell,
@@ -343,6 +378,10 @@ class StockUtil {
 				total: DAYS.map((day) => ramda.sum(foreignList.slice(-day))),
 				daysChange: DAYS.map((day) => foreignHolding - getNDayAgoStock(foreignList, day)),
 				turnPoint: getTurningPoint(foreignList),
+				placementStrategy: {
+					enter: stockInfo4DaysAgo.foreignHolding === 0 && foreignHolding !== 0,
+					exit: stockInfo4DaysAgo.foreignHolding !== 0 && foreignHolding === 0,
+				},
 			},
 			sites: {
 				today: sitesNetBuySell,
@@ -352,6 +391,10 @@ class StockUtil {
 				total: DAYS.map((day) => ramda.sum(sitesList.slice(-day))),
 				daysChange: DAYS.map((day) => sitesHolding - getNDayAgoStock(sitesList, day)),
 				turnPoint: getTurningPoint(sitesList),
+				placementStrategy: {
+					enter: stockInfo4DaysAgo.sitesHolding === 0 && sitesHolding !== 0,
+					exit: stockInfo4DaysAgo.sitesHolding !== 0 && sitesHolding === 0,
+				},
 			},
 			dealer: {
 				today: dealerNetBuySell,
@@ -361,6 +404,10 @@ class StockUtil {
 				total: DAYS.map((day) => ramda.sum(dealerList.slice(-day))),
 				daysChange: DAYS.map((day) => dealerHolding - getNDayAgoStock(dealerList, day)),
 				turnPoint: getTurningPoint(dealerList),
+				placementStrategy: {
+					enter: stockInfo4DaysAgo.dealerHolding === 0 && dealerHolding !== 0,
+					exit: stockInfo4DaysAgo.dealerHolding !== 0 && dealerHolding === 0,
+				},
 			},
 			bigThree: {
 				today: bigThreeNetBuySell,
@@ -370,6 +417,7 @@ class StockUtil {
 				total: DAYS.map((day) => ramda.sum(bigThreeList.slice(-day))),
 				daysChange: DAYS.map((day) => bigThreeHolding - getNDayAgoStock(bigThreeList, day)),
 				turnPoint: getTurningPoint(bigThreeList),
+				placementStrategy: null,
 			},
 		};
 	}

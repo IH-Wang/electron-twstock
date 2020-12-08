@@ -94,8 +94,10 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
-	mainWindow.destroy();
-	app.quit();
+	mainWindow && mainWindow.destroy();
+	if (process.platform !== 'darwin') {
+		app.quit();
+	}
 });
 app.on('activate', () => {
 	// On macOS it's common to re-create a window in the app when the

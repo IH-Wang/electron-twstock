@@ -15,6 +15,9 @@ builder
 			win: {
 				icon: './public/image/stock_256.png',
 			},
+			portable: {
+				artifactName: 'twstock.exe',
+			},
 			files: ['public/**/*', 'main.js', 'preload.js'],
 			// asar: false,
 		},

@@ -8,12 +8,16 @@
 	import Pagination from '../components/common/pagination/Pagination.svelte';
 	// store
 	import MainStore from '../stores/main.js';
+	// util
+	import dbUtil from '../util/db';
+	// constants
+	import { DB_STOCK_INFO } from '../constants';
 
 	let db = getContext('db');
 	onMount(async () => {
 		db = await db;
-		// const infoList = await db.stockInfos.getAll();
-		// MainStore.setBaseStockInfoList(infoList);
+		const stockInfoList = await dbUtil.getAllItems(db, DB_STOCK_INFO);
+		MainStore.setBaseStockInfoList(stockInfoList);
 	});
 	onDestroy(() => {
 		MainStore.reset();

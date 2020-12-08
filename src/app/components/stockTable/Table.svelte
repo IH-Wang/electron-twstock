@@ -31,13 +31,13 @@
 
 <div class="{styled.tableWrapper} w-full">
 	<div class="flex flex-col">
-		<div class="my-2 overflow-x-auto">
+		<div class="my-2">
 			<div class="align-middle inline-block min-w-full px-4">
 				{#if !R.isEmpty(stockInfoList)}
 					<p>日期: {stockInfoList[0].date}</p>
 				{/if}
 				<div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-					<table class="min-w-full divide-y divide-gray-200">
+					<table class="min-w-full divide-y divide-gray-200 overflow-auto">
 						<thead>
 							<tr class="{styled.tableHeader}">
 								<th
