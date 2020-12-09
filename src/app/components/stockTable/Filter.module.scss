@@ -1,7 +1,8 @@
 .priceVolBtn {
 	background-color: #fff;
 	color: #333;
-}
-.active {
-	background-color: var(--theme-progressCircleBar);
+	.active {
+		background-color: var(--theme-progressCircleBar);
+		color: #fff;
+	}
 }

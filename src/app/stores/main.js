@@ -95,27 +95,7 @@ const filterByParams = (params) =>
 	});
 // 過濾篩選
 const filterData = (props, data) => {
-	const {
-		searchText,
-		maxPrice,
-		minPrice,
-		endPrice,
-		marketType,
-		category,
-		isLongOrder,
-		isShortOrder,
-		isTangledMA,
-		isFlagType,
-		isReverse,
-		isLimitUp,
-		isLimitDown,
-		riseDropType,
-		selectedRiseDropIndex,
-		selectedMaxMinIndex,
-		riseDropMargin,
-		maxMinType,
-		priceVolType,
-	} = props;
+	const { searchText, marketType, category } = props;
 	let newData = data;
 
 	if (searchText.length > 1) {
@@ -127,16 +107,39 @@ const filterData = (props, data) => {
 	if (category !== -1) {
 		newData = newData.filter((stock) => stock.category === category);
 	}
+	newData = filterByPriceVol(props, newData);
+	newData = filterByStrategy(props, newData);
+	return newData;
+};
+// 過濾價量篩選
+const filterByPriceVol = (props, data) => {
+	const {
+		maxPrice,
+		minPrice,
+		endPrice,
+		isLimitUp,
+		isLimitDown,
+		riseDropType,
+		selectedRiseDropIndex,
+		selectedMaxMinIndex,
+		riseDropMargin,
+		maxMinType,
+		priceVolType,
+	} = props;
+	let newData = data;
+	// 最高價
 	if (maxPrice > 0) {
 		newData = newData.filter((stock) => stock.priceInfo.maxPrice === maxPrice);
 	}
+	//最低價
 	if (minPrice > 0) {
 		newData = newData.filter((stock) => stock.priceInfo.minPrice === minPrice);
 	}
+	// 收盤價
 	if (endPrice > 0) {
 		newData = newData.filter((stock) => stock.priceInfo.endPrice === endPrice);
 	}
-
+	// 近日漲跌幅
 	if (riseDropType && riseDropMargin) {
 		newData = newData.filter((stock) =>
 			riseDropType === filterRiseDropTabs.rise
@@ -144,6 +147,7 @@ const filterData = (props, data) => {
 				: stock.priceInfo.riseDropDays.margin[selectedRiseDropIndex] <= riseDropMargin * -1,
 		);
 	}
+	// 近日新高新低
 	if (maxMinType) {
 		newData = newData.filter((stock) =>
 			maxMinType === filterMaxMinTabs.max
@@ -151,6 +155,7 @@ const filterData = (props, data) => {
 				: stock.priceInfo.endPrice === stock.priceInfo.minMA[selectedMaxMinIndex],
 		);
 	}
+	// 漲停、跌停
 	if (isLimitUp && isLimitDown) {
 		newData = newData.filter((stock) => !!stock.priceInfo.isLimitUp || !!stock.priceInfo.isLimitDown);
 	} else if (isLimitUp) {
@@ -158,6 +163,7 @@ const filterData = (props, data) => {
 	} else if (isLimitDown) {
 		newData = newData.filter((stock) => !!stock.priceInfo.isLimitDown);
 	}
+	// 價量判斷
 	if (priceVolType) {
 		switch (priceVolType) {
 			case '價量齊揚':
@@ -188,12 +194,16 @@ const filterData = (props, data) => {
 						stock.volInfo.vol < stock.volInfo.volDays[DAYS.indexOf(20)],
 				);
 				break;
-
 			default:
 				break;
 		}
 	}
-
+	return newData;
+};
+// 過濾價量篩選
+const filterByStrategy = (props, data) => {
+	const { isLongOrder, isShortOrder, isTangledMA, isFlagType, isReverse } = props;
+	let newData = data;
 	if (isLongOrder) {
 		newData = newData.filter((stock) => !!stock.priceInfo.isLongOrder);
 	}

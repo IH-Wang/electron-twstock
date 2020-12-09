@@ -1,13 +1,66 @@
 .tableWrapper {
-	overflow-y: auto;
+	height: 300px;
+}
+.table {
+	table-layout: fixed;
 }
 
 .tableHeader {
-	background-color: var(--theme-titleBarBG);
 	th {
+		position: sticky;
+		top: 0;
+		background-color: var(--theme-titleBarBG);
 		color: var(--theme-titleBarText);
 		font-weight: bolder;
 		font-size: 0.8em;
 		min-width: 6em;
+		height: 2em;
 	}
+	th:first-child,
+	th:nth-child(2) {
+		z-index: 2;
+	}
+	th:first-child {
+		position: sticky;
+		left: 0;
+	}
+	th:nth-child(2) {
+		position: sticky;
+		left: 6.6em;
+	}
+	th:nth-child(n + 3) {
+		z-index: 1;
+	}
+}
+.tableBody {
+	td {
+		position: sticky;
+		top: 2.4em;
+		background-color: white;
+		min-width: 6em;
+	}
+	td:first-child,
+	td:nth-child(2) {
+		z-index: 2;
+	}
+	td:first-child {
+		position: sticky;
+		left: 0;
+	}
+	td:nth-child(2) {
+		position: sticky;
+		left: 6em;
+	}
+	td:nth-child(n + 3) {
+		z-index: 1;
+	}
+}
+
+td.limitUp {
+	background-color: red;
+	color: white;
+}
+td.limitDown {
+	background-color: green;
+	color: white;
 }

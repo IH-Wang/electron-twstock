@@ -9,7 +9,7 @@
 
 <script>
 	import * as R from 'ramda';
-	import { slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	// util
 	import { toCurrency } from '../../util/common/index';
 	// css
@@ -30,15 +30,17 @@
 	};
 </script>
 
-<div class="{styled.tableWrapper} w-full">
-	<div class="flex flex-col">
-		<div class="my-2">
-			<div class="align-middle inline-block w-full px-4">
-				{#if !R.isEmpty(stockInfoList)}
-					<p>日期: {stockInfoList[0].date} | 符合筆數: {count}</p>
-				{/if}
-				<div class="shadow overflow-auto border-b border-gray-200 sm:rounded-lg">
-					<table class="min-w-full divide-y divide-gray-200">
+<div class="w-full">
+	<div class="flex flex-col my-2">
+		<div class="align-middle inline-block w-full px-4">
+			{#if !R.isEmpty(stockInfoList)}
+				<p>日期: {stockInfoList[0].date} | 符合筆數: {count}</p>
+			{/if}
+			<div class="{styled.tableWrapper} shadow overflow-auto w-full border-b border-gray-200 sm:rounded-lg">
+				{#if R.isEmpty(stockInfoList)}
+					<span>查無資料</span>
+				{:else}
+					<table class="{styled.table} min-w-full divide-y divide-gray-200">
 						<thead>
 							<tr class="{styled.tableHeader}">
 								<th
@@ -196,106 +198,102 @@
 							</tr>
 						</thead>
 
-						{#if R.isEmpty(stockInfoList)}
-							<span>查無資料</span>
-						{:else}
-							<tbody class="bg-white divide-y divide-gray-200 text-center" transition:slide>
-								{#each stockInfoList as stock (stock.code)}
-									<tr>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{stock.code}</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{stock.name}</td>
-										{#if !R.isEmpty(filterProps.marketType)}
-											<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-												{stock.marketType}
-											</td>
-										{/if}
-										{#if filterProps.category !== -1}
-											<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-												{stock.category}
-											</td>
-										{/if}
+						<tbody class="divide-y divide-gray-200 text-center">
+							{#each stockInfoList as stock (stock.code)}
+								<tr class="{styled.tableBody}" transition:fade="{{ duration: 200 }}">
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{stock.code}</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{stock.name}</td>
+									{#if !R.isEmpty(filterProps.marketType)}
 										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.priceInfo.refPrice)}
+											{stock.marketType}
 										</td>
-										<td
-											class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.startPrice, stock.priceInfo.refPrice)}"
-										>
-											{toCurrency(stock.priceInfo.startPrice)}
-										</td>
-										<td
-											class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.endPrice, stock.priceInfo.refPrice)}"
-										>
-											{toCurrency(stock.priceInfo.endPrice)}
-										</td>
-										<td
-											class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.maxPrice, stock.priceInfo.refPrice)}"
-										>
-											{toCurrency(stock.priceInfo.maxPrice)}
-										</td>
-										<td
-											class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.minPrice, stock.priceInfo.refPrice)}"
-										>
-											{toCurrency(stock.priceInfo.minPrice)}
-										</td>
-										<td
-											class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.riseDropPrice, 0)}"
-										>
-											{stock.priceInfo.riseDropPrice}
-										</td>
-										<td
-											class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.riseDropMargin, 0)}"
-										>
-											{stock.priceInfo.riseDropMargin}%
-										</td>
+									{/if}
+									{#if filterProps.category !== -1}
 										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{stock.priceInfo.priceAmplitude}%
+											{stock.category}
 										</td>
+									{/if}
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.priceInfo.refPrice)}
+									</td>
+									<td
+										class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.endPrice === stock.priceInfo.startPrice && (stock.priceInfo.isLimitUp || stock.priceInfo.isLimitDown) ? (stock.priceInfo.isLimitUp ? styled.limitUp : styled.limitDown) : getRiseDropColor(stock.priceInfo.startPrice, stock.priceInfo.refPrice)}"
+									>
+										{toCurrency(stock.priceInfo.startPrice)}
+									</td>
+									<td
+										class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.isLimitUp ? styled.limitUp : stock.priceInfo.isLimitDown ? styled.limitDown : getRiseDropColor(stock.priceInfo.endPrice, stock.priceInfo.refPrice)}"
+									>
+										{toCurrency(stock.priceInfo.endPrice)}
+									</td>
+									<td
+										class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.endPrice === stock.priceInfo.maxPrice && (stock.priceInfo.isLimitUp || stock.priceInfo.isLimitDown) ? (stock.priceInfo.isLimitUp ? styled.limitUp : styled.limitDown) : getRiseDropColor(stock.priceInfo.maxPrice, stock.priceInfo.refPrice)}"
+									>
+										{toCurrency(stock.priceInfo.maxPrice)}
+									</td>
+									<td
+										class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.endPrice === stock.priceInfo.minPrice && (stock.priceInfo.isLimitUp || stock.priceInfo.isLimitDown) ? (stock.priceInfo.isLimitUp ? styled.limitUp : styled.limitDown) : getRiseDropColor(stock.priceInfo.minPrice, stock.priceInfo.refPrice)}"
+									>
+										{toCurrency(stock.priceInfo.minPrice)}
+									</td>
+									<td
+										class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.isLimitUp ? styled.limitUp : stock.priceInfo.isLimitDown ? styled.limitDown : getRiseDropColor(stock.priceInfo.riseDropPrice, 0)}"
+									>
+										{stock.priceInfo.riseDropPrice}
+									</td>
+									<td
+										class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.isLimitUp ? styled.limitUp : stock.priceInfo.isLimitDown ? styled.limitDown : getRiseDropColor(stock.priceInfo.riseDropMargin, 0)}"
+									>
+										{stock.priceInfo.riseDropMargin}%
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{stock.priceInfo.priceAmplitude}%
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.volInfo.vol)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.buySellInfo.bigThree.today)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.buySellInfo.foreign.today)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.buySellInfo.sites.today)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.buySellInfo.dealer.today)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.buySellInfo.major.today)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.bsmInfo.marginPurchase.change)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.bsmInfo.shortSale.change)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.bsmInfo.marginPurchaseRatio)}
+									</td>
+									<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+										{toCurrency(stock.bsmInfo.bsmRatio)}
+									</td>
+									{#if filterProps.isFlagType}
 										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.volInfo.vol)}
+											{flagInfoList[stock.flagInfo.flagLevel - 1]}{stock.flagInfo.isFlagType ? '(末端)' : ''}
 										</td>
+									{/if}
+									{#if filterProps.isReverseType}
 										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.buySellInfo.bigThree.today)}
+											{stock.reverseInfo.reverseType}
 										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.buySellInfo.foreign.today)}
-										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.buySellInfo.sites.today)}
-										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.buySellInfo.dealer.today)}
-										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.buySellInfo.major.today)}
-										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.bsmInfo.marginPurchase.change)}
-										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.bsmInfo.shortSale.change)}
-										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.bsmInfo.marginPurchaseRatio)}
-										</td>
-										<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-											{toCurrency(stock.bsmInfo.bsmRatio)}
-										</td>
-										{#if filterProps.isFlagType}
-											<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-												{flagInfoList[stock.flagInfo.flagLevel - 1]}{stock.flagInfo.isFlagType ? '(末端)' : ''}
-											</td>
-										{/if}
-										{#if filterProps.isReverseType}
-											<td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-												{stock.reverseInfo.reverseType}
-											</td>
-										{/if}
-									</tr>
-								{/each}
-							</tbody>
-						{/if}
+									{/if}
+								</tr>
+							{/each}
+						</tbody>
 					</table>
-				</div>
+				{/if}
 			</div>
 		</div>
 	</div>
