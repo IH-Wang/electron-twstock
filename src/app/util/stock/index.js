@@ -119,9 +119,13 @@ class StockUtil {
 			priceMA[DAYS.indexOf(10)] < priceMA[DAYS.indexOf(20)] &&
 			priceMA[DAYS.indexOf(20)] < priceMA[DAYS.indexOf(60)];
 		// 判斷漲停
-		const isLimitUp = riseDropPrice > 0 && riseDropPrice === numFloor(refPrice / 10, 2);
+		const isLimitUp =
+			riseDropPrice > 0 &&
+			riseDropPrice === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
 		// 判斷跌停
-		const isLimitDown = riseDropPrice < 0 && Math.abs(riseDropPrice) === numFloor(refPrice / 10, 2);
+		const isLimitDown =
+			riseDropPrice < 0 &&
+			Math.abs(riseDropPrice) === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
 
 		return {
 			refPrice,

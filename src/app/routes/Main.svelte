@@ -34,6 +34,7 @@
 	<Table
 		filterProps="{{ marketType: $MainStore.marketType, category: $MainStore.category, isFlagType: $MainStore.isFlagType, isReverseType: $MainStore.isReverse }}"
 		stockInfoList="{$MainStore.stockInfoList.slice(($MainStore.current - 1) * 10, $MainStore.current * 10)}"
+		count="{$MainStore.totalItems || 0}"
 	/>
 	{#if $MainStore.totalItems > $MainStore.perPage}
 		<Pagination

@@ -11,7 +11,7 @@
 	export let color = 'indigo';
 	let prevTotalItems;
 	$: s = small ? 8 : 12;
-	$: num_pages = Math.floor(totalItems / perPage);
+	$: num_pages = Math.ceil(totalItems / perPage);
 	let arr_pages = [];
 	function buildArr(c, n) {
 		if (n <= 7) {
@@ -35,7 +35,7 @@
 		current = 1;
 	}
 	$: if (totalItems) {
-		num_pages = Math.round(totalItems / perPage);
+		num_pages = Math.ceil(totalItems / perPage);
 		current = current || 1;
 	}
 	$: if (totalItems !== prevTotalItems) {

@@ -16,6 +16,7 @@
 	import styled from './Table.module.scss';
 
 	export let stockInfoList = [];
+	export let count = 0;
 	export let filterProps = { marketType: '', category: -1, isFlagType: false, isReverseType: false };
 	const flagInfoList = ['弱勢', '中等', '強勢'];
 	const getRiseDropColor = (base, compare) => {
@@ -34,7 +35,7 @@
 		<div class="my-2">
 			<div class="align-middle inline-block w-full px-4">
 				{#if !R.isEmpty(stockInfoList)}
-					<p>日期: {stockInfoList[0].date}</p>
+					<p>日期: {stockInfoList[0].date} | 符合筆數: {count}</p>
 				{/if}
 				<div class="shadow overflow-auto border-b border-gray-200 sm:rounded-lg">
 					<table class="min-w-full divide-y divide-gray-200">
@@ -150,7 +151,7 @@
 									scope="col"
 									class="px-1 py-2 text-center font-bold font-bold uppercase tracking-wider"
 								>
-									主力
+									大戶
 								</th>
 								<th
 									scope="col"

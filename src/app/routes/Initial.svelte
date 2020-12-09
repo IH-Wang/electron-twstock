@@ -37,7 +37,7 @@
 	});
 </script>
 
-<div class="pageWrapper">
+<div class="pageWrapper justify-center">
 	{#if isStockCodeChecking}
 		<Wave />
 		<div>

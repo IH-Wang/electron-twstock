@@ -10,35 +10,22 @@
 	import MainStore from '../../stores/main';
 	// component
 	import Tab from '../common/tab/Tab.svelte';
-	import TabPanel from '../common/tab/TabPanel.svelte';
-	import { DAYS } from '../../util/stock';
+	import PriceVolFilter from './PriceVolFilter.svelte';
 	const filterTabOption = {
 		priceVol: '價量篩選',
 		strategy: '技術篩選',
 		big3: '三大法人',
 	};
-	const filterRiseDropTabs = {
-		rise: '漲幅',
-		drop: '跌幅',
-	};
-	const filterMaxMinTabs = {
-		max: '新高',
-		min: '新低',
-	};
+
 	let selectMarketType = '';
 	let selectCategory = -1;
 	let searchText = '';
-	let searchMaxPrice;
-	let searchMinPrice;
-	let searchEndPrice;
+
 	let isLongOrder, isShortOrder;
 	let tabs = Object.values(filterTabOption);
 	let activeTab;
-	let activeRiseDropTab = '';
-	let selectedRiseDropIndex = 0;
-	let searchRiseDropMargin;
-	let activeMaxMinTab = '';
-	let selectedMaxMinIndex = 0;
+	let isReset = false;
+
 	// 過濾股號 | 股名
 	const changeText = (evt) => {
 		if (!evt.data || (evt.data.match(/^[\u4e00-\u9fa5a-zA-Z0-9]+$/) && searchText.length > 1)) {
@@ -68,32 +55,11 @@
 	const resetFilter = () => {
 		MainStore.resetFilter();
 		activeTab = tabs[0];
+		isReset = true;
 	};
 	// 切換 tab
-	const changeTab = (type) => (tab) => {
-		switch (type) {
-			case 'riseDrop':
-				activeRiseDropTab = tab;
-				break;
-			case 'main':
-			default:
-				activeTab = tab;
-				break;
-		}
-	};
-
-	const changeSelect = (type) => (selected) => {
-		switch (type) {
-			case 'riseDrop':
-				console.log(selected);
-				break;
-			case 'main':
-			default:
-				break;
-		}
-	};
-	const changePrice = (evt) => {
-		MainStore.filterByParams({ [evt.target.name]: evt.target.value ? Number(evt.target.value) : '' });
+	const changeTab = (tab) => {
+		activeTab = tab;
 	};
 </script>
 
@@ -147,98 +113,15 @@
 		</div>
 	</div>
 	<div class="mt-2">
-		<Tab tabs="{tabs}" bind:activeTab changeTab="{changeTab('main')}" />
+		<Tab tabs="{tabs}" bind:activeTab changeTab="{changeTab}" />
+	</div>
+	<div class="mt-2 flex flex-wrap">
+		{#if activeTab === filterTabOption.priceVol}
+			<PriceVolFilter bind:isReset />
+		{/if}
 	</div>
 	{#if activeTab === filterTabOption.priceVol}
-		<div class="mt-2 inline-flex">
-			<TabPanel title="價格">
-				<div>
-					<span>最高</span>
-					<input
-						type="number"
-						name="maxPrice"
-						bind:value="{searchMaxPrice}"
-						on:input="{changePrice}"
-						placeholder="最高價"
-						class="focus:ring-indigo-500 rounded-md mx-1 w-20 text-center"
-					/>
-				</div>
-				<div class="mt-1">
-					<span>最低</span>
-					<input
-						type="number"
-						name="minPrice"
-						bind:value="{searchMinPrice}"
-						on:input="{changePrice}"
-						placeholder="最低價"
-						class="focus:ring-indigo-500 rounded-md mx-1  w-20 text-center"
-					/>
-				</div>
-				<div class="mt-1">
-					<span>收盤</span>
-					<input
-						type="number"
-						name="endPrice"
-						bind:value="{searchEndPrice}"
-						on:input="{changePrice}"
-						placeholder="收盤價"
-						class="focus:ring-indigo-500 rounded-md mx-1 w-20 text-center"
-					/>
-				</div>
-			</TabPanel>
-			<TabPanel
-				title="漲跌"
-				tabs="{Object.values(filterRiseDropTabs)}"
-				changeTab="{changeTab('riseDrop')}"
-				activeTab="{activeRiseDropTab}"
-				options="{DAYS.map((day) => `${day} 日`)}"
-				changeOption="{changeSelect('riseDrop')}"
-				selectedOption="{selectedRiseDropIndex}"
-			>
-				<input
-					type="number"
-					name="riseDropMargin"
-					bind:value="{searchRiseDropMargin}"
-					placeholder="漲跌"
-					class="focus:ring-indigo-500 rounded-md m-1 w-24 text-center"
-					on:change="{changePrice}"
-					disabled="{!activeRiseDropTab}"
-				/>
-				%
-			</TabPanel>
-			<TabPanel
-				title="高低"
-				tabs="{Object.values(filterMaxMinTabs)}"
-				changeTab="{changeTab('maxMin')}"
-				activeTab="{activeMaxMinTab}"
-				options="{DAYS.map((day) => `${day} 日`)}"
-				changeOption="{changeSelect('maxMin')}"
-				selectedOption="{selectedMaxMinIndex}"
-			>
-				<div class="inline-flex mt-1 justify-around w-full">
-					<div>
-						<span>漲停</span>
-						<input
-							name="isLongOrder"
-							type="checkbox"
-							class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-							on:change="{changeFilterCheck}"
-							bind:checked="{isLongOrder}"
-						/>
-					</div>
-					<div>
-						<span>跌停</span>
-						<input
-							name="isLongOrder"
-							type="checkbox"
-							class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-							on:change="{changeFilterCheck}"
-							bind:checked="{isLongOrder}"
-						/>
-					</div>
-				</div>
-			</TabPanel>
-		</div>
+		<div></div>
 	{:else if activeTab === filterTabOption.strategy}
 		<div class="mt-2 inline-flex">
 			<div class="inline-flex items-center mx-1">
