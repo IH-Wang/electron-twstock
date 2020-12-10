@@ -25,7 +25,8 @@
 		searchEndPrice = $MainStore.endPrice,
 		activeRiseDropTab = $MainStore.riseDropType,
 		selectedRiseDropIndex = $MainStore.selectedRiseDropIndex,
-		searchRiseDropMargin = $MainStore.riseDropMargin,
+		searchStartRiseDropMargin = $MainStore.startRiseDropMargin,
+		searchEndRiseDropMargin = $MainStore.endRiseDropMargin,
 		activeMaxMinTab = $MainStore.maxMinType,
 		selectedMaxMinIndex = $MainStore.selectedMaxMinIndex,
 		isLimitUp = $MainStore.isLimitUp,
@@ -80,7 +81,8 @@
 			searchEndPrice = undefined;
 			activeRiseDropTab = '';
 			selectedRiseDropIndex = 0;
-			searchRiseDropMargin;
+			searchStartRiseDropMargin = undefined;
+			searchEndRiseDropMargin = undefined;
 			activeMaxMinTab = '';
 			selectedMaxMinIndex = 0;
 			isLimitUp = false;
@@ -137,10 +139,18 @@
 >
 	<input
 		type="number"
-		name="riseDropMargin"
-		bind:value="{searchRiseDropMargin}"
+		name="startRiseDropMargin"
+		bind:value="{searchStartRiseDropMargin}"
 		placeholder="漲跌"
-		class="focus:ring-indigo-500 rounded-md m-1 w-24 text-center"
+		class="focus:ring-indigo-500 rounded-md m-1 w-16 text-center"
+		on:change="{changePrice}"
+		disabled="{!activeRiseDropTab}"
+	/>~<input
+		type="number"
+		name="endRiseDropMargin"
+		bind:value="{searchEndRiseDropMargin}"
+		placeholder="漲跌"
+		class="focus:ring-indigo-500 rounded-md m-1 w-16 text-center"
 		on:change="{changePrice}"
 		disabled="{!activeRiseDropTab}"
 	/>

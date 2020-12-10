@@ -4,5 +4,5 @@ export const numRound = (number, round) => {
 };
 export const numFloor = (number, round) => {
 	const pow = Math.pow(10, round);
-	return Math.floor(number * pow) / pow;
+	return Math.ceil(number * pow) / pow;
 };

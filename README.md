@@ -11,7 +11,7 @@
 
 ## Screenshot
 
-![](https://i.imgur.com/d7M3nNn.jpg)
+![](https://i.imgur.com/T7BzZgs.gif)
 
 ## 目前功能
 
@@ -23,8 +23,7 @@
 
 ## 待完成
 
-1. 右鍵點 icon 顯示調整
-2. 打包封裝測試
+1. 打包封裝測試
 
 ## Run
 

@@ -491,7 +491,10 @@ class StockUtil {
 		return {
 			top: [booleanTop, preBooleanTop],
 			bottom: [booleanBottom, preBooleanBottom],
-			compressionRatio: numRound(((booleanTop - booleanBottom) / price20MA) * 100, 2),
+			compressionRatio: [
+				numRound(((booleanTop - booleanBottom) / price20MA) * 100, 2),
+				numRound(((preBooleanTop - preBooleanBottom) / prePrice20MA) * 100, 2),
+			],
 			isStandOnTop: prePrice < preBooleanTop && price >= booleanTop,
 			isBreakBelowBottom: prePrice > preBooleanBottom && price <= booleanBottom,
 		};

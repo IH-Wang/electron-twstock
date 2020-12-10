@@ -1,5 +1,5 @@
 .tableWrapper {
-	height: 300px;
+	height: 400px;
 }
 .table {
 	table-layout: fixed;
@@ -14,7 +14,7 @@
 		font-weight: bolder;
 		font-size: 0.8em;
 		min-width: 6em;
-		height: 2em;
+		height: 50px;
 	}
 	th:first-child,
 	th:nth-child(2) {
@@ -23,10 +23,12 @@
 	th:first-child {
 		position: sticky;
 		left: 0;
+		width: 6em;
 	}
 	th:nth-child(2) {
 		position: sticky;
-		left: 6.6em;
+		left: 6.55em;
+		width: 10em;
 	}
 	th:nth-child(n + 3) {
 		z-index: 1;
@@ -35,9 +37,10 @@
 .tableBody {
 	td {
 		position: sticky;
-		top: 2.4em;
+		top: 50px;
 		background-color: white;
 		min-width: 6em;
+		height: 50px;
 	}
 	td:first-child,
 	td:nth-child(2) {
@@ -46,10 +49,12 @@
 	td:first-child {
 		position: sticky;
 		left: 0;
+		width: 6em;
 	}
 	td:nth-child(2) {
 		position: sticky;
 		left: 6em;
+		width: 10em;
 	}
 	td:nth-child(n + 3) {
 		z-index: 1;
@@ -59,8 +64,15 @@
 td.limitUp {
 	background-color: red;
 	color: white;
+	font-weight: 1000;
+	font-size: 1em;
 }
 td.limitDown {
 	background-color: green;
 	color: white;
+	font-weight: 1000;
+	font-size: 1em;
+}
+td.boolean {
+	font-size: 0.7em;
 }

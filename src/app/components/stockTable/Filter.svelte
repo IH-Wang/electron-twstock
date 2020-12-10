@@ -11,6 +11,7 @@
 	// component
 	import Tab from '../common/tab/Tab.svelte';
 	import PriceVolFilter from './PriceVolFilter.svelte';
+	import StrategyFilter from './StrategyFilter.svelte';
 	const filterTabOption = {
 		priceVol: '價量篩選',
 		strategy: '技術篩選',
@@ -21,7 +22,6 @@
 	let selectCategory = -1;
 	let searchText = '';
 
-	let isLongOrder, isShortOrder;
 	let tabs = Object.values(filterTabOption);
 	let activeTab;
 	let isReset = false;
@@ -39,18 +39,6 @@
 	//過濾產業
 	const changeCategory = () => {
 		MainStore.changeCategory(selectCategory);
-	};
-	// 過濾 checkbox 篩選
-	const changeFilterCheck = (evt) => {
-		if (evt.target.name === 'isLongOrder' && evt.target.checked) {
-			isShortOrder = false;
-			MainStore.filterByParams({ [evt.target.name]: evt.target.checked, isShortOrder: false });
-		} else if (evt.target.name === 'isShortOrder' && evt.target.checked) {
-			isLongOrder = false;
-			MainStore.filterByParams({ [evt.target.name]: evt.target.checked, isLongOrder: false });
-		} else {
-			MainStore.filterByParams({ [evt.target.name]: evt.target.checked });
-		}
 	};
 	const resetFilter = () => {
 		MainStore.resetFilter();
@@ -118,61 +106,10 @@
 	<div class="mt-2 flex flex-wrap">
 		{#if activeTab === filterTabOption.priceVol}
 			<PriceVolFilter bind:isReset />
+		{:else if activeTab === filterTabOption.strategy}
+			<StrategyFilter bind:isReset />
+		{:else if activeTab === filterTabOption.big3}
+			<div class="mt-2 inline-flex"></div>
 		{/if}
 	</div>
-	{#if activeTab === filterTabOption.priceVol}
-		<div></div>
-	{:else if activeTab === filterTabOption.strategy}
-		<div class="mt-2 inline-flex">
-			<div class="inline-flex items-center mx-1">
-				<span>多頭排列</span>
-				<input
-					name="isLongOrder"
-					type="checkbox"
-					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded ml-2"
-					on:change="{changeFilterCheck}"
-					bind:checked="{isLongOrder}"
-				/>
-			</div>
-			<div class="inline-flex items-center mx-1">
-				<span>空頭排列</span>
-				<input
-					name="isShortOrder"
-					type="checkbox"
-					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded ml-2"
-					on:change="{changeFilterCheck}"
-					bind:checked="{isShortOrder}"
-				/>
-			</div>
-			<div class="inline-flex items-center mx-1">
-				<span>均線糾結</span>
-				<input
-					name="isTangledMA"
-					type="checkbox"
-					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded ml-2"
-					on:change="{changeFilterCheck}"
-				/>
-			</div>
-			<div class="inline-flex items-center mx-1">
-				<span>旗型</span>
-				<input
-					name="isFlagType"
-					type="checkbox"
-					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded ml-2"
-					on:change="{changeFilterCheck}"
-				/>
-			</div>
-			<div class="inline-flex items-center mx-1">
-				<span>破切</span>
-				<input
-					name="isReverse"
-					type="checkbox"
-					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded ml-2"
-					on:change="{changeFilterCheck}"
-				/>
-			</div>
-		</div>
-	{:else if activeTab === filterTabOption.big3}
-		<div class="mt-2 inline-flex"></div>
-	{/if}
 </div>

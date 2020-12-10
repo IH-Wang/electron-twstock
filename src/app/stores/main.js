@@ -19,7 +19,8 @@ const mainConfig = {
 	perPage: 10,
 	riseDropType: '',
 	selectedRiseDropIndex: 0,
-	riseDropMargin: 0,
+	startRiseDropMargin: 0,
+	endRiseDropMargin: 0,
 	maxMinType: '',
 	selectedMaxMinIndex: 0,
 	priceVolType: '',
@@ -30,6 +31,12 @@ const mainConfig = {
 	isReverse: false,
 	isLongOrder: false,
 	isShortOrder: false,
+	isBreakTangled: false,
+	isDropTangled: false,
+	isStandOnTop: false,
+	isBreakBelowBottom: false,
+	isBooleanCompression: false,
+	isBooleanExpand: false,
 };
 
 const { subscribe, set, update } = writable(mainConfig);
@@ -122,7 +129,8 @@ const filterByPriceVol = (props, data) => {
 		riseDropType,
 		selectedRiseDropIndex,
 		selectedMaxMinIndex,
-		riseDropMargin,
+		startRiseDropMargin,
+		endRiseDropMargin,
 		maxMinType,
 		priceVolType,
 	} = props;
@@ -140,12 +148,30 @@ const filterByPriceVol = (props, data) => {
 		newData = newData.filter((stock) => stock.priceInfo.endPrice === endPrice);
 	}
 	// 近日漲跌幅
-	if (riseDropType && riseDropMargin) {
-		newData = newData.filter((stock) =>
-			riseDropType === filterRiseDropTabs.rise
-				? stock.priceInfo.riseDropDays.margin[selectedRiseDropIndex] >= riseDropMargin
-				: stock.priceInfo.riseDropDays.margin[selectedRiseDropIndex] <= riseDropMargin * -1,
-		);
+	if (riseDropType && (startRiseDropMargin || endRiseDropMargin)) {
+		if (riseDropType === filterRiseDropTabs.rise) {
+			newData = newData.filter((stock) => {
+				const margin = stock.priceInfo.riseDropDays.margin[selectedRiseDropIndex];
+				if (startRiseDropMargin && endRiseDropMargin) {
+					return margin >= startRiseDropMargin && margin <= endRiseDropMargin;
+				} else if (startRiseDropMargin && !endRiseDropMargin) {
+					return margin >= startRiseDropMargin;
+				} else {
+					return margin <= endRiseDropMargin;
+				}
+			});
+		} else {
+			newData = newData.filter((stock) => {
+				const margin = stock.priceInfo.riseDropDays.margin[selectedRiseDropIndex];
+				if (startRiseDropMargin && endRiseDropMargin) {
+					return margin <= startRiseDropMargin * -1 && margin >= endRiseDropMargin * -1;
+				} else if (startRiseDropMargin && !endRiseDropMargin) {
+					return margin <= startRiseDropMargin * -1;
+				} else {
+					return margin >= endRiseDropMargin * -1;
+				}
+			});
+		}
 	}
 	// 近日新高新低
 	if (maxMinType) {
@@ -202,7 +228,19 @@ const filterByPriceVol = (props, data) => {
 };
 // 過濾價量篩選
 const filterByStrategy = (props, data) => {
-	const { isLongOrder, isShortOrder, isTangledMA, isFlagType, isReverse } = props;
+	const {
+		isLongOrder,
+		isShortOrder,
+		isTangledMA,
+		isFlagType,
+		isReverse,
+		isBreakTangled,
+		isDropTangled,
+		isStandOnTop,
+		isBreakBelowBottom,
+		isBooleanCompression,
+		isBooleanExpand,
+	} = props;
 	let newData = data;
 	if (isLongOrder) {
 		newData = newData.filter((stock) => !!stock.priceInfo.isLongOrder);
@@ -218,6 +256,28 @@ const filterByStrategy = (props, data) => {
 	}
 	if (isReverse) {
 		newData = newData.filter((stock) => stock.reverseInfo.isReverse === isReverse);
+	}
+	if (isBreakTangled) {
+		newData = newData.filter((stock) => stock.reverseInfo.isBreakTangled === isBreakTangled);
+	}
+	if (isDropTangled) {
+		newData = newData.filter((stock) => stock.reverseInfo.isDropTangled === isDropTangled);
+	}
+	if (isStandOnTop) {
+		newData = newData.filter((stock) => stock.booleanInfo.isStandOnTop === isStandOnTop);
+	}
+	if (isBreakBelowBottom) {
+		newData = newData.filter((stock) => stock.booleanInfo.isBreakBelowBottom === isBreakBelowBottom);
+	}
+	if (isBooleanCompression) {
+		newData = newData.filter((stock) => stock.booleanInfo.compressionRatio[0] < 10);
+	}
+	if (isBooleanExpand) {
+		newData = newData.filter(
+			(stock) =>
+				stock.booleanInfo.compressionRatio[0] > stock.booleanInfo.compressionRatio[1] + 2.5 &&
+				stock.booleanInfo.compressionRatio[1] < 10,
+		);
 	}
 	return newData;
 };
@@ -253,7 +313,8 @@ const resetFilter = () =>
 			totalItems: props.baseStockInfoList.length,
 			riseDropType: '',
 			selectedRiseDropIndex: 0,
-			riseDropMargin: 0,
+			startRiseDropMargin: 0,
+			endRiseDropMargin: 0,
 			maxMinType: '',
 			selectedMaxMinIndex: 0,
 			priceVolType: '',
@@ -264,6 +325,12 @@ const resetFilter = () =>
 			isReverse: false,
 			isLongOrder: false,
 			isShortOrder: false,
+			isBreakTangled: false,
+			isDropTangled: false,
+			isStandOnTop: false,
+			isBreakBelowBottom: false,
+			isBooleanCompression: false,
+			isBooleanExpand: false,
 		};
 	});
 
