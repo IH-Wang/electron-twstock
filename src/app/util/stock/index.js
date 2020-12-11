@@ -59,6 +59,18 @@ const getTurningPoint = (list) => {
 		}
 	}
 };
+
+const calculateEMA = (mArray, mRange) => {
+	var k = 2 / (mRange + 1);
+	// first item is just the same as the first item in the input
+	const emaArray = [mArray[0]];
+	// for the rest of the items, they are computed with the previous one
+	for (var i = 1; i < mArray.length; i++) {
+		emaArray.push(mArray[i] * k + emaArray[i - 1] * (1 - k));
+	}
+	return emaArray;
+};
+
 class StockUtil {
 	// 取得 price 相關資訊
 	static getPriceInfo(stockInfo, stockList) {
@@ -497,6 +509,37 @@ class StockUtil {
 			],
 			isStandOnTop: prePrice < preBooleanTop && price >= booleanTop,
 			isBreakBelowBottom: prePrice > preBooleanBottom && price <= booleanBottom,
+		};
+	}
+	// 取得 macd 資訊
+	static getMACDInfo(stockList) {
+		const endPriceList = stockList.map((stock) => stock.endPrice);
+		const ema12 = calculateEMA(endPriceList, 12);
+		const ema26 = calculateEMA(endPriceList, 26);
+		// 快線
+		const dif = ema12.map((num, index) => num - ema26[index]);
+		// 慢線
+		const macd = calculateEMA(dif, 9);
+		// 柱
+		const bar = dif.map((num, index) => num - macd[index]);
+		const dif3days = dif.slice(-3);
+		const isDeceaseTrend =
+			dif3days.every((val, index) => (index === 0 ? true : val < dif3days[index - 1])) &&
+			getNDayAgoStock(dif3days, 1) < 1 &&
+			getNDayAgoStock(dif3days, 2) > 1;
+		const isIncreaseTrend =
+			dif3days.every((val, index) => (index === 0 ? true : val > dif3days[index - 1])) &&
+			getNDayAgoStock(dif3days, 1) > -1 &&
+			getNDayAgoStock(dif3days, 2) < -1;
+		return {
+			dif: numRound(getNDayAgoStock(dif, 1), 2),
+			macd: numRound(getNDayAgoStock(macd, 1), 2),
+			isDeceaseTrend,
+			isIncreaseTrend,
+			cross: {
+				isRed: getNDayAgoStock(bar, 1) > 0 && getNDayAgoStock(bar, 2) < 0,
+				isGreen: getNDayAgoStock(bar, 1) < 0 && getNDayAgoStock(bar, 2) > 0,
+			},
 		};
 	}
 }

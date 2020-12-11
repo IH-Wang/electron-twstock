@@ -163,3 +163,6 @@
 		</div>
 	</div>
 </TabPanel>
+<TabPanel title="MACD">
+	<div></div>
+</TabPanel>

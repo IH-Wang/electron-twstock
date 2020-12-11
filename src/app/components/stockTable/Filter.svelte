@@ -12,6 +12,7 @@
 	import Tab from '../common/tab/Tab.svelte';
 	import PriceVolFilter from './PriceVolFilter.svelte';
 	import StrategyFilter from './StrategyFilter.svelte';
+	import BigThreeFilter from './BigThreeFilter.svelte';
 	const filterTabOption = {
 		priceVol: '價量篩選',
 		strategy: '技術篩選',
@@ -109,7 +110,7 @@
 		{:else if activeTab === filterTabOption.strategy}
 			<StrategyFilter bind:isReset />
 		{:else if activeTab === filterTabOption.big3}
-			<div class="mt-2 inline-flex"></div>
+			<BigThreeFilter bind:isReset />
 		{/if}
 	</div>
 </div>

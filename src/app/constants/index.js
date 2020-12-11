@@ -8,6 +8,7 @@ export const MAX_MIN = 'MAX_MIN';
 export const LONG_SHORT = 'LONG_SHORT';
 export const BREAK_DROP = 'BREAK_DROP';
 export const TOP_BOTTOM = 'TOP_BOTTOM';
+export const INCREASE_DECREASE = 'INCREASE_DECREASE';
 export const DAYS = [3, 5, 10, 20, 60, 120];
 export const filterRiseDropTabs = {
 	rise: '漲幅',
@@ -28,4 +29,8 @@ export const filterTangledTabs = {
 export const filterBooleanTabs = {
 	top: '站上上軌',
 	bottom: '跌破下軌',
+};
+export const filterVolTabs = {
+	increase: '量增',
+	decrease: '量縮',
 };

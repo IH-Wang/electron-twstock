@@ -45,12 +45,8 @@
 							<tr class="{styled.tableHeader}">
 								<th scope="col" class="text-center uppercase tracking-wider">股號</th>
 								<th scope="col" class="text-center uppercase tracking-wider">名稱</th>
-								{#if !R.isEmpty(filterProps.marketType)}
-									<th scope="col" class="text-center uppercase tracking-wider">市場</th>
-								{/if}
-								{#if filterProps.category !== -1}
-									<th scope="col" class="text-center uppercase tracking-wider">產業</th>
-								{/if}
+								<th scope="col" class="text-center uppercase tracking-wider">市場</th>
+								<th scope="col" class="text-center uppercase tracking-wider">產業</th>
 								<th scope="col" class="text-center uppercase tracking-wider">參考價</th>
 								<th scope="col" class="text-center uppercase tracking-wider">開盤價</th>
 								<th scope="col" class="text-center uppercase tracking-wider">收盤價</th>
@@ -117,12 +113,8 @@
 								<tr class="{styled.tableBody}" transition:fade="{{ duration: 200 }}">
 									<td class="whitespace-nowrap text-sm text-gray-500">{stock.code}</td>
 									<td class="whitespace-nowrap text-sm text-gray-500">{stock.name}</td>
-									{#if !R.isEmpty(filterProps.marketType)}
-										<td class="whitespace-nowrap text-sm text-gray-500">{stock.marketType}</td>
-									{/if}
-									{#if filterProps.category !== -1}
-										<td class="whitespace-nowrap text-sm text-gray-500">{stock.category}</td>
-									{/if}
+									<td class="whitespace-nowrap text-sm text-gray-500">{stock.marketType}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500">{stock.category}</td>
 									<td class="whitespace-nowrap text-sm text-gray-500">
 										{toCurrency(stock.priceInfo.refPrice)}
 									</td>
@@ -147,7 +139,7 @@
 										{toCurrency(stock.priceInfo.minPrice)}
 									</td>
 									<td
-										class="whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.isLimitUp ? styled.limitUp : stock.priceInfo.isLimitDown ? styled.limitDown : getRiseDropColor(stock.priceInfo.riseDropPrice, 0)}"
+										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.riseDropPrice, 0)}"
 									>
 										{stock.priceInfo.riseDropPrice}
 									</td>

@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import * as R from 'ramda';
 // constants
-import { filterRiseDropTabs, filterMaxMinTabs, DAYS } from '../constants';
+import { filterRiseDropTabs, filterMaxMinTabs, filterVolTabs, DAYS } from '../constants';
 
 const mainConfig = {
 	marketTypeList: [],
@@ -17,6 +17,10 @@ const mainConfig = {
 	current: 1,
 	totalItems: 0,
 	perPage: 10,
+	volType: '',
+	selectedVolIndex: 0,
+	fromVol: 0,
+	toVol: 0,
 	riseDropType: '',
 	selectedRiseDropIndex: 0,
 	startRiseDropMargin: 0,
@@ -24,6 +28,7 @@ const mainConfig = {
 	maxMinType: '',
 	selectedMaxMinIndex: 0,
 	priceVolType: '',
+
 	isLimitUp: false,
 	isLimitDown: false,
 	isTangledMA: false,
@@ -133,6 +138,10 @@ const filterByPriceVol = (props, data) => {
 		endRiseDropMargin,
 		maxMinType,
 		priceVolType,
+		volType,
+		selectedVolIndex,
+		fromVol,
+		toVol,
 	} = props;
 	let newData = data;
 	// 最高價
@@ -146,6 +155,24 @@ const filterByPriceVol = (props, data) => {
 	// 收盤價
 	if (endPrice > 0) {
 		newData = newData.filter((stock) => stock.priceInfo.endPrice === endPrice);
+	}
+	// 量突破或低於成交均量
+	if (volType) {
+		if (volType === filterVolTabs.increase) {
+			newData = newData.filter((stock) => stock.volInfo.vol > stock.volInfo.volDays[selectedVolIndex]);
+		} else {
+			newData = newData.filter((stock) => stock.volInfo.vol < stock.volInfo.volDays[selectedVolIndex]);
+		}
+	}
+	// 成交量範圍查詢
+	if (fromVol || toVol) {
+		if (fromVol && toVol) {
+			newData = newData.filter((stock) => stock.volInfo.vol >= fromVol && stock.volInfo.vol <= toVol);
+		} else if (fromVol && !toVol) {
+			newData = newData.filter((stock) => stock.volInfo.vol >= fromVol);
+		} else {
+			newData = newData.filter((stock) => stock.volInfo.vol <= toVol);
+		}
 	}
 	// 近日漲跌幅
 	if (riseDropType && (startRiseDropMargin || endRiseDropMargin)) {
@@ -311,6 +338,10 @@ const resetFilter = () =>
 			category: -1,
 			current: 1,
 			totalItems: props.baseStockInfoList.length,
+			volType: '',
+			selectedVolIndex: 0,
+			fromVol: 0,
+			toVol: 0,
 			riseDropType: '',
 			selectedRiseDropIndex: 0,
 			startRiseDropMargin: 0,

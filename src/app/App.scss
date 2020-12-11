@@ -19,6 +19,14 @@ h1 {
 		font-size: 2em;
 	}
 }
+input,
+select {
+	color: #333;
+}
+input:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--theme-inputFocusBorder);
+}
 
 .pageWrapper {
 	display: flex;

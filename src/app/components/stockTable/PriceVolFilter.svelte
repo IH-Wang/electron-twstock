@@ -1,8 +1,4 @@
 <style>
-	input:focus {
-		outline: none;
-		box-shadow: 0 0 0 2px var(--theme-inputFocusBorder);
-	}
 </style>
 
 <script>
@@ -13,7 +9,14 @@
 	// util
 	import { DAYS } from '../../util/stock';
 	// constants
-	import { RISE_DROP, MAX_MIN, filterRiseDropTabs, filterMaxMinTabs } from '../../constants';
+	import {
+		RISE_DROP,
+		MAX_MIN,
+		INCREASE_DECREASE,
+		filterRiseDropTabs,
+		filterMaxMinTabs,
+		filterVolTabs,
+	} from '../../constants';
 	// style
 	import styled from './Filter.module.scss';
 	export let isReset = false;
@@ -31,7 +34,11 @@
 		selectedMaxMinIndex = $MainStore.selectedMaxMinIndex,
 		isLimitUp = $MainStore.isLimitUp,
 		isLimitDown = $MainStore.isLimitDown,
-		selectPriceVol = $MainStore.priceVolType;
+		selectPriceVol = $MainStore.priceVolType,
+		activeVolTab = $MainStore.volType,
+		selectedVolIndex = $MainStore.selectedVolIndex,
+		searchFromVol = $MainStore.fromVol,
+		searchToVol = $MainStore.toVol;
 
 	const changePrice = (evt) => {
 		MainStore.filterByParams({ [evt.target.name]: evt.target.value ? Number(evt.target.value) : '' });
@@ -48,6 +55,10 @@
 				activeMaxMinTab = tab;
 				MainStore.filterByParams({ maxMinType: tab });
 				break;
+			case INCREASE_DECREASE:
+				activeVolTab = tab;
+				MainStore.filterByParams({ volType: tab });
+				break;
 			default:
 				break;
 		}
@@ -61,6 +72,10 @@
 			case MAX_MIN:
 				selectedMaxMinIndex = Number(evt.target.value);
 				MainStore.filterByParams({ selectedMaxMinIndex });
+				break;
+			case INCREASE_DECREASE:
+				selectedVolIndex = Number(evt.target.value);
+				MainStore.filterByParams({ selectedVolIndex });
 				break;
 			default:
 				break;
@@ -88,6 +103,10 @@
 			isLimitUp = false;
 			isLimitDown = false;
 			selectPriceVol = '';
+			activeVolTab = '';
+			selectedVolIndex = 0;
+			searchFromVol = undefined;
+			searchToVol = undefined;
 			isReset = false;
 		}
 	}
@@ -129,6 +148,38 @@
 	</div>
 </TabPanel>
 <TabPanel
+	title="成交量"
+	tabs="{Object.values(filterVolTabs)}"
+	changeTab="{changeTab(INCREASE_DECREASE)}"
+	activeTab="{activeVolTab}"
+	options="{DAYS.map((day) => `${day} 日均量`)}"
+	changeOption="{changeSelect(INCREASE_DECREASE)}"
+	selectedOption="{selectedVolIndex}"
+>
+	<div class="flex mt-2 mx-1">
+		<span class="text-sm rounded-l w-12">起</span>
+		<input
+			type="number"
+			name="fromVol"
+			bind:value="{searchFromVol}"
+			placeholder="量增減"
+			class="focus:ring-indigo-500 rounded-md mx-1  w-full text-center"
+			on:change="{changePrice}"
+		/>
+	</div>
+	<div class="flex mt-1 mx-1">
+		<span class="text-sm rounded-l w-12">訖</span>
+		<input
+			type="number"
+			name="toVol"
+			bind:value="{searchToVol}"
+			placeholder="量增減"
+			class="focus:ring-indigo-500 rounded-md mx-1  w-full text-center"
+			on:change="{changePrice}"
+		/>
+	</div>
+</TabPanel>
+<TabPanel
 	title="漲跌"
 	tabs="{Object.values(filterRiseDropTabs)}"
 	changeTab="{changeTab(RISE_DROP)}"
@@ -137,24 +188,31 @@
 	changeOption="{changeSelect(RISE_DROP)}"
 	selectedOption="{selectedRiseDropIndex}"
 >
-	<input
-		type="number"
-		name="startRiseDropMargin"
-		bind:value="{searchStartRiseDropMargin}"
-		placeholder="漲跌"
-		class="focus:ring-indigo-500 rounded-md m-1 w-16 text-center"
-		on:change="{changePrice}"
-		disabled="{!activeRiseDropTab}"
-	/>~<input
-		type="number"
-		name="endRiseDropMargin"
-		bind:value="{searchEndRiseDropMargin}"
-		placeholder="漲跌"
-		class="focus:ring-indigo-500 rounded-md m-1 w-16 text-center"
-		on:change="{changePrice}"
-		disabled="{!activeRiseDropTab}"
-	/>
-	%
+	<div class="flex mt-2 mx-1">
+		<span class="text-sm rounded-l w-12">起</span>
+		<input
+			type="number"
+			name="startRiseDropMargin"
+			bind:value="{searchStartRiseDropMargin}"
+			placeholder="漲跌"
+			class="focus:ring-indigo-500 rounded-md mx-1  w-full text-center"
+			on:change="{changePrice}"
+			disabled="{!activeRiseDropTab}"
+		/>%
+	</div>
+	<div class="flex mt-1 mx-1">
+		<span class="text-sm rounded-l w-12">訖</span>
+		<input
+			type="number"
+			name="endRiseDropMargin"
+			bind:value="{searchEndRiseDropMargin}"
+			placeholder="漲跌"
+			class="focus:ring-indigo-500 rounded-md mx-1  w-full text-center"
+			on:change="{changePrice}"
+			disabled="{!activeRiseDropTab}"
+		/>
+		%
+	</div>
 </TabPanel>
 <TabPanel
 	title="收盤價"

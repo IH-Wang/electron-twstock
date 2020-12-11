@@ -50,7 +50,7 @@ function createWindow() {
 			}
 
 			mainWindow = new BrowserWindow({
-				width: width / 1.05,
+				width: width / 1.01,
 				height: height / 1.01,
 				title: '股溝',
 				icon: `${app.getAppPath()}/public/image/icon/stock.${process.platform !== 'darwin' ? 'ico' : 'icns'}`,

@@ -24,7 +24,11 @@
 
 <div class="{styled.titleBar}">
 	<header class="flex mx-auto px-3 justify-between items-center">
-		<div class="{styled.titleLogo}"><img src="image/stock.png" alt="logo" /><span>股溝</span></div>
+		<div class="{styled.titleLogo}">
+			<img src="image/stock.png" alt="logo" />
+			<span>股溝</span>
+			<span class="text-xs text-gray-500">~ 在茫茫股海深溝裡，露出好股</span>
+		</div>
 
 		<nav class="{styled.titleControl}">
 			<ul>
