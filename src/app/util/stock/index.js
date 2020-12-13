@@ -75,7 +75,7 @@ class StockUtil {
 	// 取得 price 相關資訊
 	static getPriceInfo(stockInfo, stockList) {
 		const { startPrice, endPrice, maxPrice, minPrice } = stockInfo;
-		const { endPrice: refPrice } = getNDayAgoStock(stockList, 2);
+		const { endPrice: refPrice = 0 } = getNDayAgoStock(stockList, 2);
 		const endPriceList = stockList.map((stock) => stock.endPrice);
 		const maxPriceList = stockList.map((stock) => stock.maxPrice);
 		const minPriceList = stockList.map((stock) => stock.minPrice);
@@ -138,6 +138,20 @@ class StockUtil {
 		const isLimitDown =
 			riseDropPrice < 0 &&
 			Math.abs(riseDropPrice) === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
+		// 判斷均線均線上彎
+		const maReverseUp = DAYS.map(
+			(day) =>
+				endPrice > getNDayAgoStock(endPriceList, day - 1) &&
+				endPrice > getNDayAgoStock(endPriceList, day) &&
+				refPrice < getNDayAgoStock(endPriceList, day + 1),
+		);
+		// 判斷均線均線下彎
+		const maReverseDown = DAYS.map(
+			(day) =>
+				endPrice < getNDayAgoStock(endPriceList, day - 1) &&
+				endPrice < getNDayAgoStock(endPriceList, day) &&
+				refPrice > getNDayAgoStock(endPriceList, day + 1),
+		);
 
 		return {
 			refPrice,
@@ -159,6 +173,10 @@ class StockUtil {
 			isShortOrder,
 			isLimitUp,
 			isLimitDown,
+			maReverse: {
+				up: maReverseUp,
+				down: maReverseDown,
+			},
 			riseDropDays: {
 				price: DAYS.map((day) => numRound(endPrice - getNDayAgoStock(endPriceList, day), 2)),
 				margin: DAYS.map((day) =>

@@ -79,7 +79,7 @@
 						console.error(error);
 						window.location.reload();
 					});
-				if (!R.isEmpty(stockInfoRes)) {
+				if (stockInfoRes.length === 121) {
 					const stockInfo = stockInfoRes.slice(-1)[0];
 					await dbUtil.setItem(db, {
 						store: DB_STOCK_INFO,
@@ -97,6 +97,7 @@
 							buySellInfo: stockUtil.getNetBuySellInfo(stockInfo, stockInfoRes),
 							bsmInfo: stockUtil.getBSMInfo(stockInfo, stockInfoRes),
 							booleanInfo: stockUtil.getBooleanInfo(stockInfoRes),
+							macdInfo: stockUtil.getMACDInfo(stockInfoRes),
 						},
 					});
 				} else {
@@ -117,7 +118,7 @@
 		stockInfoList = await dbUtil.getAllItems(db, DB_STOCK_INFO);
 		if (stockInfoList.length === totalStocks) {
 			const isNewDate = await checkStockInfoList(db, stockInfoList[0].date);
-			console.log('isNewDate', isNewDate);
+			await delay(200);
 			isNewDate ? percent.set(100) : initStockInfo(0);
 		} else {
 			initStockInfo(0);
@@ -140,6 +141,6 @@
 		{:else}
 			<p>全部資料建置完成</p>
 		{/if}
-		<p class="{styled.memo}">(各股抓取120天資料做建置)</p>
+		<p class="{styled.memo}">(各股抓取120天資料做建置, 不滿120天暫不建檔)</p>
 	</div>
 </div>

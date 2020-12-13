@@ -1,5 +1,5 @@
 .tableWrapper {
-	height: 400px;
+	height: 350px;
 }
 .table {
 	table-layout: fixed;
@@ -73,6 +73,8 @@ td.limitDown {
 	font-weight: 1000;
 	font-size: 1em;
 }
-td.boolean {
+td.boolean,
+td.macd {
 	font-size: 0.7em;
+	padding: 0 0.5em;
 }

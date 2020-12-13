@@ -247,7 +247,7 @@
 	</div>
 </TabPanel>
 <TabPanel title="價量關係">
-	<div class="flex flex-wrap {styled.priceVolBtn}">
+	<div class="flex flex-wrap {styled.filterBtn}">
 		{#each priceVolOptions as option}
 			<div
 				class="{selectPriceVol === option ? styled.active : ''} text-sm w-1/2 border py-2 cursor-pointer hover:border-blue-500 hover:text-gray-500"

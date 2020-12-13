@@ -6,25 +6,25 @@
 	// constants
 	import {
 		LONG_SHORT,
-		BREAK_DROP,
 		TOP_BOTTOM,
+		UP_DOWN,
 		filterLongShortTabs,
-		filterTangledTabs,
+		filterMATypeTabs,
 		filterBooleanTabs,
+		DAYS,
 	} from '../../constants';
 	// style
-	// import styled from './Filter.module.scss';
+	import styled from './Filter.module.scss';
 	export let isReset = false;
+	const selectDays = DAYS.map((day) => `${day} 日線`);
+	const macdOptions = ['趨勢向上', '趨勢向下', '黃金交叉', '死亡交叉'];
 	let activeLongShortTab = $MainStore.isLongOrder
 		? filterLongShortTabs.long
 		: $MainStore.isShortOrder
 		? filterLongShortTabs.short
 		: '';
-	let activeBreakDropTab = $MainStore.isBreakTangled
-		? filterTangledTabs.break
-		: $MainStore.isDropTangled
-		? filterTangledTabs.drop
-		: '';
+	let activeMAReverseTab = $MainStore.maReverseType;
+	let selectedMAReverseIndex = $MainStore.selectedMAReverseIndex;
 	let activeBooleanTab = $MainStore.isStandOnTop
 		? filterBooleanTabs.top
 		: $MainStore.isBreakBelowBottom
@@ -35,28 +35,25 @@
 		isTangledMA = $MainStore.isTangledMA,
 		isBooleanCompression = $MainStore.isBooleanCompression,
 		isBooleanExpand = $MainStore.isBooleanExpand;
+	let selectMACDType = $MainStore.macdType;
 
 	// 切換 tab
 	const changeTab = (type) => (tab) => {
 		switch (type) {
 			case LONG_SHORT:
-				activeLongShortTab = activeLongShortTab === tab ? '' : tab;
+				activeLongShortTab = tab;
 				if (tab === filterLongShortTabs.long) {
 					MainStore.filterByParams({ isLongOrder: !!activeLongShortTab, isShortOrder: false });
 				} else {
 					MainStore.filterByParams({ isShortOrder: !!activeLongShortTab, isLongOrder: false });
 				}
 				break;
-			case BREAK_DROP:
-				activeBreakDropTab = activeBreakDropTab === tab ? '' : tab;
-				if (tab === filterTangledTabs.break) {
-					MainStore.filterByParams({ isBreakTangled: !!activeBreakDropTab, isDropTangled: false });
-				} else {
-					MainStore.filterByParams({ isDropTangled: !!activeBreakDropTab, isBreakTangled: false });
-				}
+			case UP_DOWN:
+				activeMAReverseTab = tab;
+				MainStore.filterByParams({ maReverseType: activeMAReverseTab });
 				break;
 			case TOP_BOTTOM:
-				activeBooleanTab = activeBooleanTab === tab ? '' : tab;
+				activeBooleanTab = tab;
 				if (tab === filterBooleanTabs.top) {
 					MainStore.filterByParams({ isStandOnTop: !!activeBooleanTab, isBreakBelowBottom: false });
 				} else {
@@ -71,11 +68,26 @@
 	const changeFilterCheck = (evt) => {
 		MainStore.filterByParams({ [evt.target.name]: evt.target.checked });
 	};
+	const changeSelect = (type) => (evt) => {
+		switch (type) {
+			case UP_DOWN:
+				selectedMAReverseIndex = Number(evt.target.value);
+				MainStore.filterByParams({ selectedMAReverseIndex });
+				break;
+			default:
+				break;
+		}
+	};
+	const changeMACDType = (key) => () => {
+		selectMACDType = selectMACDType === key ? '' : key;
+		MainStore.filterByParams({ macdType: selectMACDType });
+	};
 	$: {
 		if (isReset) {
 			activeLongShortTab = '';
-			activeBreakDropTab = '';
+			activeMAReverseTab = '';
 			activeBooleanTab = '';
+			selectMACDType = '';
 			isFlagType = false;
 			isReverse = false;
 			isReset = false;
@@ -117,9 +129,12 @@
 </TabPanel>
 <TabPanel
 	title="均線"
-	tabs="{Object.values(filterTangledTabs)}"
-	changeTab="{changeTab(BREAK_DROP)}"
-	activeTab="{activeBreakDropTab}"
+	tabs="{Object.values(filterMATypeTabs)}"
+	changeTab="{changeTab(UP_DOWN)}"
+	activeTab="{activeMAReverseTab}"
+	options="{selectDays}"
+	changeOption="{changeSelect(UP_DOWN)}"
+	selectedOption="{selectedMAReverseIndex}}"
 >
 	<div class="inline-flex mt-1 justify-around w-full">
 		<div>
@@ -164,5 +179,14 @@
 	</div>
 </TabPanel>
 <TabPanel title="MACD">
-	<div></div>
+	<div class="flex flex-wrap {styled.filterBtn}">
+		{#each macdOptions as option}
+			<div
+				class="{selectMACDType === option ? styled.active : ''} text-sm w-1/2 border py-2 cursor-pointer hover:border-blue-500 hover:text-gray-500"
+				on:click="{changeMACDType(option)}"
+			>
+				{option}
+			</div>
+		{/each}
+	</div>
 </TabPanel>

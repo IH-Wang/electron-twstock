@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import * as R from 'ramda';
 // constants
-import { filterRiseDropTabs, filterMaxMinTabs, filterVolTabs, DAYS } from '../constants';
+import { filterRiseDropTabs, filterMaxMinTabs, filterVolTabs, filterMATypeTabs, DAYS } from '../constants';
 
 const mainConfig = {
 	marketTypeList: [],
@@ -28,6 +28,9 @@ const mainConfig = {
 	maxMinType: '',
 	selectedMaxMinIndex: 0,
 	priceVolType: '',
+	maReverseType: '',
+	selectedMAReverseIndex: 0,
+	macdType: '',
 
 	isLimitUp: false,
 	isLimitDown: false,
@@ -256,17 +259,20 @@ const filterByPriceVol = (props, data) => {
 // 過濾價量篩選
 const filterByStrategy = (props, data) => {
 	const {
+		maReverseType,
 		isLongOrder,
 		isShortOrder,
 		isTangledMA,
 		isFlagType,
 		isReverse,
-		isBreakTangled,
-		isDropTangled,
+		macdType,
+		// isBreakTangled,
+		// isDropTangled,
 		isStandOnTop,
 		isBreakBelowBottom,
 		isBooleanCompression,
 		isBooleanExpand,
+		selectedMAReverseIndex,
 	} = props;
 	let newData = data;
 	if (isLongOrder) {
@@ -284,12 +290,35 @@ const filterByStrategy = (props, data) => {
 	if (isReverse) {
 		newData = newData.filter((stock) => stock.reverseInfo.isReverse === isReverse);
 	}
-	if (isBreakTangled) {
-		newData = newData.filter((stock) => stock.reverseInfo.isBreakTangled === isBreakTangled);
+	if (maReverseType) {
+		if (maReverseType === filterMATypeTabs.up) {
+			newData = newData.filter((stock) => !!stock.priceInfo.maReverse.up[selectedMAReverseIndex]);
+		} else {
+			newData = newData.filter((stock) => !!stock.priceInfo.maReverse.down[selectedMAReverseIndex]);
+		}
 	}
-	if (isDropTangled) {
-		newData = newData.filter((stock) => stock.reverseInfo.isDropTangled === isDropTangled);
+	if (macdType) {
+		switch (macdType) {
+			case '趨勢向上':
+				newData = newData.filter((stock) => !!stock.macdInfo.isIncreaseTrend);
+				break;
+			case '趨勢向下':
+				newData = newData.filter((stock) => !!stock.macdInfo.isDeceaseTrend);
+				break;
+			case '黃金交叉':
+				newData = newData.filter((stock) => !!stock.macdInfo.cross.isRed);
+				break;
+			case '死亡交叉':
+				newData = newData.filter((stock) => !!stock.macdInfo.cross.isGreen);
+				break;
+		}
 	}
+	// if (isBreakTangled) {
+	// 	newData = newData.filter((stock) => !!stock.priceInfo.maReverse.up[DAYS.indexOf(60)]);
+	// }
+	// if (isDropTangled) {
+	// 	newData = newData.filter((stock) => !stock.priceInfo.maReverse.up[DAYS.indexOf(60)]);
+	// }
 	if (isStandOnTop) {
 		newData = newData.filter((stock) => stock.booleanInfo.isStandOnTop === isStandOnTop);
 	}
@@ -349,6 +378,9 @@ const resetFilter = () =>
 			maxMinType: '',
 			selectedMaxMinIndex: 0,
 			priceVolType: '',
+			maReverseType: '',
+			selectedMAReverseIndex: 0,
+			macdType: '',
 			isLimitUp: false,
 			isLimitDown: false,
 			isTangledMA: false,

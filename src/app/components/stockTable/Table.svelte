@@ -99,6 +99,7 @@
 								<th scope="col" class="text-center uppercase tracking-wider">融資使用率</th>
 								<th scope="col" class="text-center uppercase tracking-wider">券資比</th>
 								<th scope="col" class="text-center uppercase tracking-wider">布林通道</th>
+								<th scope="col" class="text-center uppercase tracking-wider">MACD</th>
 								{#if filterProps.isFlagType}
 									<th scope="col" class="text-center uppercase tracking-wider">旗型</th>
 								{/if}
@@ -218,6 +219,18 @@
 											上軌:{toCurrency(stock.booleanInfo.top[0])}
 											| 下軌:{toCurrency(stock.booleanInfo.bottom[0])}
 											| 壓縮率:{toCurrency(stock.booleanInfo.compressionRatio[0])}%
+										</p>
+									</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {styled.macd}">
+										<p>
+											DIF:{stock.macdInfo.dif}
+											| MACD:{stock.macdInfo.macd}
+											| OSC:
+											{(stock.macdInfo.dif - stock.macdInfo.macd).toFixed(2)}
+											{stock.macdInfo.isIncreaseTrend ? ' | 趨勢向上' : ''}
+											{stock.macdInfo.isDeceaseTrend ? ' | 趨勢向下' : ''}
+											{stock.macdInfo.cross.isRed ? ' | 黃金交叉' : ''}
+											{stock.macdInfo.cross.isGreen ? ' | 死亡交叉' : ''}
 										</p>
 									</td>
 									{#if filterProps.isFlagType}

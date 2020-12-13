@@ -27,7 +27,7 @@
 		<div class="{styled.titleLogo}">
 			<img src="image/stock.png" alt="logo" />
 			<span>股溝</span>
-			<span class="text-xs text-gray-500">~ 在茫茫股海深溝裡，露出好股</span>
+			<span class="text-xs text-gray-500">~ 在茫茫股海深溝裡，挖出好股</span>
 		</div>
 
 		<nav class="{styled.titleControl}">
