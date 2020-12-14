@@ -10,6 +10,10 @@ export const BREAK_DROP = 'BREAK_DROP';
 export const TOP_BOTTOM = 'TOP_BOTTOM';
 export const UP_DOWN = 'UP_DOWN';
 export const INCREASE_DECREASE = 'INCREASE_DECREASE';
+export const FOREIGN = 'FOREIGN';
+export const SITES = 'SITES';
+export const DEALER = 'DEALER';
+export const MAJOR = 'MAJOR';
 export const DAYS = [3, 5, 10, 20, 60, 120];
 export const filterRiseDropTabs = {
 	rise: '漲幅',
@@ -34,4 +38,8 @@ export const filterBooleanTabs = {
 export const filterVolTabs = {
 	increase: '量增',
 	decrease: '量縮',
+};
+export const filterBuySellTabs = {
+	buy: '轉買',
+	sell: '轉賣',
 };

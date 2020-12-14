@@ -1,7 +1,14 @@
 import { writable } from 'svelte/store';
 import * as R from 'ramda';
 // constants
-import { filterRiseDropTabs, filterMaxMinTabs, filterVolTabs, filterMATypeTabs, DAYS } from '../constants';
+import {
+	filterRiseDropTabs,
+	filterMaxMinTabs,
+	filterVolTabs,
+	filterMATypeTabs,
+	filterBuySellTabs,
+	DAYS,
+} from '../constants';
 
 const mainConfig = {
 	marketTypeList: [],
@@ -31,6 +38,10 @@ const mainConfig = {
 	maReverseType: '',
 	selectedMAReverseIndex: 0,
 	macdType: '',
+	activeForeignTab: '',
+	activeSitesTab: '',
+	activeDealerTab: '',
+	activeMajorTab: '',
 
 	isLimitUp: false,
 	isLimitDown: false,
@@ -45,6 +56,14 @@ const mainConfig = {
 	isBreakBelowBottom: false,
 	isBooleanCompression: false,
 	isBooleanExpand: false,
+	isForeignEnter: false,
+	isForeignExit: false,
+	isSitesEnter: false,
+	isSitesExit: false,
+	isDealerEnter: false,
+	isDealerExit: false,
+	isMajorContinuousBuy: false,
+	isMajorContinuousSell: false,
 };
 
 const { subscribe, set, update } = writable(mainConfig);
@@ -124,6 +143,7 @@ const filterData = (props, data) => {
 	}
 	newData = filterByPriceVol(props, newData);
 	newData = filterByStrategy(props, newData);
+	newData = filterByBuySell(props, newData);
 	return newData;
 };
 // 過濾價量篩選
@@ -256,7 +276,7 @@ const filterByPriceVol = (props, data) => {
 	}
 	return newData;
 };
-// 過濾價量篩選
+// 過濾技術篩選
 const filterByStrategy = (props, data) => {
 	const {
 		maReverseType,
@@ -338,6 +358,94 @@ const filterByStrategy = (props, data) => {
 	return newData;
 };
 
+// 過濾三大法人篩選
+const filterByBuySell = (props, data) => {
+	const {
+		activeForeignTab,
+		activeSitesTab,
+		activeDealerTab,
+		activeMajorTab,
+		isForeignEnter,
+		isForeignExit,
+		isSitesEnter,
+		isSitesExit,
+		isDealerEnter,
+		isDealerExit,
+		isMajorContinuousBuy,
+		isMajorContinuousSell,
+	} = props;
+	let newData = data;
+	if (activeForeignTab) {
+		newData = newData.filter((stock) => {
+			const turPoint = stock.buySellInfo.foreign.turnPoint;
+			if (turPoint) {
+				return activeForeignTab === filterBuySellTabs.buy
+					? turPoint.type === 'BUY' && stock.buySellInfo.foreign.today > 0
+					: turPoint.type === 'SELL' && stock.buySellInfo.foreign.today < 0;
+			}
+			return false;
+		});
+	}
+	if (activeSitesTab) {
+		newData = newData.filter((stock) => {
+			const turPoint = stock.buySellInfo.sites.turnPoint;
+			if (turPoint) {
+				return activeSitesTab === filterBuySellTabs.buy
+					? turPoint.type === 'BUY' && stock.buySellInfo.sites.today > 0
+					: turPoint.type === 'SELL' && stock.buySellInfo.sites.today < 0;
+			}
+			return false;
+		});
+	}
+	if (activeDealerTab) {
+		newData = newData.filter((stock) => {
+			const turPoint = stock.buySellInfo.dealer.turnPoint;
+			if (turPoint) {
+				return activeDealerTab === filterBuySellTabs.buy
+					? turPoint.type === 'BUY' && stock.buySellInfo.dealer.today > 0
+					: turPoint.type === 'SELL' && stock.buySellInfo.dealer.today < 0;
+			}
+			return false;
+		});
+	}
+	if (activeMajorTab) {
+		newData = newData.filter((stock) => {
+			const turPoint = stock.buySellInfo.major.turnPoint;
+			if (turPoint) {
+				return activeMajorTab === filterBuySellTabs.buy
+					? turPoint.type === 'BUY' && stock.buySellInfo.major.today > 0
+					: turPoint.type === 'SELL' && stock.buySellInfo.major.today < 0;
+			}
+			return false;
+		});
+	}
+	if (isForeignEnter) {
+		newData = newData.filter((stock) => !!stock.buySellInfo.foreign.placementStrategy.enter);
+	}
+	if (isForeignExit) {
+		newData = newData.filter((stock) => !!stock.buySellInfo.foreign.placementStrategy.exit);
+	}
+	if (isSitesEnter) {
+		newData = newData.filter((stock) => !!stock.buySellInfo.sites.placementStrategy.enter);
+	}
+	if (isSitesExit) {
+		newData = newData.filter((stock) => !!stock.buySellInfo.sites.placementStrategy.exit);
+	}
+	if (isDealerEnter) {
+		newData = newData.filter((stock) => !!stock.buySellInfo.dealer.placementStrategy.enter);
+	}
+	if (isDealerExit) {
+		newData = newData.filter((stock) => !!stock.buySellInfo.dealer.placementStrategy.exit);
+	}
+	if (isMajorContinuousBuy) {
+		newData = newData.filter((stock) => stock.buySellInfo.major.days >= 3);
+	}
+	if (isMajorContinuousSell) {
+		newData = newData.filter((stock) => stock.buySellInfo.major.days <= -3);
+	}
+	return newData;
+};
+
 const getFilterData = (props) => {
 	const { baseStockInfoList } = props;
 	const data = [];
@@ -381,6 +489,10 @@ const resetFilter = () =>
 			maReverseType: '',
 			selectedMAReverseIndex: 0,
 			macdType: '',
+			activeForeignTab: '',
+			activeSitesTab: '',
+			activeDealerTab: '',
+			activeMajorTab: '',
 			isLimitUp: false,
 			isLimitDown: false,
 			isTangledMA: false,
@@ -394,6 +506,14 @@ const resetFilter = () =>
 			isBreakBelowBottom: false,
 			isBooleanCompression: false,
 			isBooleanExpand: false,
+			isForeignEnter: false,
+			isForeignExit: false,
+			isSitesEnter: false,
+			isSitesExit: false,
+			isDealerEnter: false,
+			isDealerExit: false,
+			isMajorContinuousBuy: false,
+			isMajorContinuousSell: false,
 		};
 	});
 

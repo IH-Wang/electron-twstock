@@ -88,6 +88,7 @@
 			activeMAReverseTab = '';
 			activeBooleanTab = '';
 			selectMACDType = '';
+			selectedMAReverseIndex = 0;
 			isFlagType = false;
 			isReverse = false;
 			isReset = false;
@@ -134,7 +135,7 @@
 	activeTab="{activeMAReverseTab}"
 	options="{selectDays}"
 	changeOption="{changeSelect(UP_DOWN)}"
-	selectedOption="{selectedMAReverseIndex}}"
+	selectedOption="{selectedMAReverseIndex}"
 >
 	<div class="inline-flex mt-1 justify-around w-full">
 		<div>

@@ -42,7 +42,7 @@ const getTurningPoint = (list) => {
 			if (getNDayAgoStock(list, i) > 0) {
 				count += 1;
 			} else {
-				return { type: 'BUY', count };
+				return { type: 'SELL', count };
 			}
 		} else if (preBuySell === 0) {
 			if (getNDayAgoStock(list, i) === 0) {
@@ -54,7 +54,7 @@ const getTurningPoint = (list) => {
 			if (getNDayAgoStock(list, i) < 0) {
 				count += 1;
 			} else {
-				return { type: 'SELL', count };
+				return { type: 'BUY', count };
 			}
 		}
 	}
