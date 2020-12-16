@@ -15,6 +15,7 @@ const mainConfig = {
 	categoryList: [],
 	baseStockInfoList: [],
 	stockInfoList: [],
+	tags: [],
 	searchText: '',
 	maxPrice: 0,
 	minPrice: 0,
@@ -125,7 +126,8 @@ const changeCategory = (category) =>
 const filterByParams = (params) =>
 	update((props) => {
 		const filterStockList = getFilterData({ ...props, ...params });
-		return { ...props, ...filterStockList };
+		const tags = getFilterTag({ ...props, ...params });
+		return { ...props, ...filterStockList, tags };
 	});
 // 過濾篩選
 const filterData = (props, data) => {
@@ -462,6 +464,148 @@ const getFilterData = (props) => {
 	};
 };
 
+const getFilterTag = (props) => {
+	const {
+		isLimitUp,
+		isLimitDown,
+		riseDropType,
+		selectedRiseDropIndex,
+		selectedMaxMinIndex,
+		startRiseDropMargin,
+		endRiseDropMargin,
+		maxMinType,
+		priceVolType,
+		volType,
+		selectedVolIndex,
+		fromVol,
+		toVol,
+		maReverseType,
+		isLongOrder,
+		isShortOrder,
+		isTangledMA,
+		isFlagType,
+		isReverse,
+		macdType,
+		isStandOnTop,
+		isBreakBelowBottom,
+		isBooleanCompression,
+		isBooleanExpand,
+		selectedMAReverseIndex,
+		activeForeignTab,
+		activeSitesTab,
+		activeDealerTab,
+		activeMajorTab,
+		isForeignEnter,
+		isForeignExit,
+		isSitesEnter,
+		isSitesExit,
+		isDealerEnter,
+		isDealerExit,
+		isMajorContinuousBuy,
+		isMajorContinuousSell,
+	} = props;
+	const tags = [];
+	if (isLimitUp) {
+		tags.push('漲停');
+	}
+	if (isLimitDown) {
+		tags.push('跌停');
+	}
+	if (riseDropType && (startRiseDropMargin || endRiseDropMargin)) {
+		tags.push(
+			`${DAYS[selectedRiseDropIndex]}日${riseDropType} ${startRiseDropMargin ? startRiseDropMargin : 0}${
+				endRiseDropMargin ? `~${endRiseDropMargin}` : ''
+			}%`,
+		);
+	}
+	if (volType) {
+		if (volType === filterVolTabs.increase) {
+			tags.push(`超過${DAYS[selectedVolIndex]}日均量`);
+		} else {
+			tags.push(`低於${DAYS[selectedVolIndex]}日均量`);
+		}
+	}
+	if (fromVol || toVol) {
+		tags.push(`成交量 ${fromVol ? fromVol : 0}${toVol ? `~${toVol}` : ''}`);
+	}
+	if (maxMinType) {
+		tags.push(`近${DAYS[selectedMaxMinIndex]}日${maxMinType}`);
+	}
+	if (priceVolType) {
+		tags.push(priceVolType);
+	}
+	if (maReverseType) {
+		tags.push(`${DAYS[selectedMAReverseIndex]}日均線${maReverseType}`);
+	}
+	if (isLongOrder) {
+		tags.push('多頭排列');
+	}
+	if (isShortOrder) {
+		tags.push('空頭排列');
+	}
+	if (isTangledMA) {
+		tags.push('均線糾結');
+	}
+	if (isFlagType) {
+		tags.push('旗型');
+	}
+	if (isReverse) {
+		tags.push('破切');
+	}
+	if (macdType) {
+		tags.push(macdType);
+	}
+	if (isStandOnTop) {
+		tags.push('站上布林上軌');
+	}
+	if (isBreakBelowBottom) {
+		tags.push('跌破布林下軌');
+	}
+	if (isBooleanCompression) {
+		tags.push('布林壓縮');
+	}
+	if (isBooleanExpand) {
+		tags.push('打開布林');
+	}
+	if (activeForeignTab) {
+		tags.push(`外資${activeForeignTab}`);
+	}
+	if (activeSitesTab) {
+		tags.push(`投信${activeSitesTab}`);
+	}
+	if (activeDealerTab) {
+		tags.push(`自營商${activeDealerTab}`);
+	}
+	if (activeMajorTab) {
+		tags.push(`大戶${activeMajorTab}`);
+	}
+	if (isForeignEnter) {
+		tags.push('外資進場');
+	}
+	if (isForeignExit) {
+		tags.push('外資出場');
+	}
+	if (isSitesEnter) {
+		tags.push('投信進場');
+	}
+	if (isSitesExit) {
+		tags.push('投信出場');
+	}
+	if (isDealerEnter) {
+		tags.push('自營商進場');
+	}
+	if (isDealerExit) {
+		tags.push('自營商出場');
+	}
+	if (isMajorContinuousBuy) {
+		tags.push('大戶連買');
+	}
+	if (isMajorContinuousSell) {
+		tags.push('大戶連賣');
+	}
+	return tags;
+};
+
 const resetFilter = () =>
 	update((props) => {
 		return {
@@ -493,6 +637,7 @@ const resetFilter = () =>
 			activeSitesTab: '',
 			activeDealerTab: '',
 			activeMajorTab: '',
+			tags: [],
 			isLimitUp: false,
 			isLimitDown: false,
 			isTangledMA: false,

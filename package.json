@@ -1,6 +1,6 @@
 {
   "name": "electron-twstock",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "A Taiwan stock desktop application with Electron & Svelte",
   "main": "./main.js",
   "scripts": {
