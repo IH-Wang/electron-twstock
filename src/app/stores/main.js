@@ -322,16 +322,32 @@ const filterByStrategy = (props, data) => {
 	if (macdType) {
 		switch (macdType) {
 			case '趨勢向上':
-				newData = newData.filter((stock) => !!stock.macdInfo.isIncreaseTrend);
+				newData = newData.filter(
+					(stock) =>
+						!!stock.macdInfo.isIncreaseTrend &&
+						stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
+				);
 				break;
 			case '趨勢向下':
-				newData = newData.filter((stock) => !!stock.macdInfo.isDeceaseTrend);
+				newData = newData.filter(
+					(stock) =>
+						!!stock.macdInfo.isDeceaseTrend &&
+						stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
+				);
 				break;
 			case '黃金交叉':
-				newData = newData.filter((stock) => !!stock.macdInfo.cross.isRed);
+				newData = newData.filter(
+					(stock) =>
+						!!stock.macdInfo.cross.isRed &&
+						stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
+				);
 				break;
 			case '死亡交叉':
-				newData = newData.filter((stock) => !!stock.macdInfo.cross.isGreen);
+				newData = newData.filter(
+					(stock) =>
+						!!stock.macdInfo.cross.isGreen &&
+						stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
+				);
 				break;
 		}
 	}

@@ -14,7 +14,7 @@ export const FOREIGN = 'FOREIGN';
 export const SITES = 'SITES';
 export const DEALER = 'DEALER';
 export const MAJOR = 'MAJOR';
-export const DAYS = [3, 5, 10, 20, 60, 120];
+export const DAYS = [3, 5, 10, 20, 60, 120, 240];
 export const filterRiseDropTabs = {
 	rise: '漲幅',
 	drop: '跌幅',

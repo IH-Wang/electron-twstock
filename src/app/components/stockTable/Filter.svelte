@@ -115,7 +115,7 @@
 	</div>
 	<div class="mt-2 flex flex-wrap">
 		{#each $MainStore.tags as tag}
-			<div class="border border-blue-500 bg-blue-500 text-white mx-1">{tag}</div>
+			<div class="border border-blue-500 bg-blue-500 text-white mx-1 px-1">{tag}</div>
 		{/each}
 	</div>
 </div>

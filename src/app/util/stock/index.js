@@ -1,6 +1,6 @@
 import * as ramda from 'ramda';
 import { numRound, numFloor } from '../math';
-export const DAYS = [3, 5, 10, 20, 60, 120];
+export const DAYS = [3, 5, 10, 20, 60, 120, 240];
 const movingAverage = (data, days) => {
 	const movingList = data.slice(days * -1);
 	return numRound(ramda.mean(movingList), 2);

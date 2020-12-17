@@ -28,6 +28,15 @@
 			return 'green';
 		}
 	};
+	const getBuySellDays = (days) => {
+		if (days > 1) {
+			return `連買 ${days} 天`;
+		} else if (days < -1) {
+			return `連賣 ${Math.abs(days)} 天`;
+		} else {
+			return '';
+		}
+	};
 </script>
 
 <div class="w-full">
@@ -73,6 +82,10 @@
 									<p>持有</p>
 								</th>
 								<th scope="col" class="text-center uppercase tracking-wider">
+									<p>外資</p>
+									<p>連買賣</p>
+								</th>
+								<th scope="col" class="text-center uppercase tracking-wider">
 									<p>投信</p>
 									<p>買賣超</p>
 								</th>
@@ -81,16 +94,28 @@
 									<p>持有</p>
 								</th>
 								<th scope="col" class="text-center uppercase tracking-wider">
+									<p>投信</p>
+									<p>連買賣</p>
+								</th>
+								<th scope="col" class="text-center uppercase tracking-wider">
 									<p>自營商</p>
 									<p>買賣超</p>
 								</th>
 								<th scope="col" class="text-center uppercase tracking-wider">
 									<p>自營商</p>
 									<p>持有</p>
+								</th>
+								<th scope="col" class="text-center uppercase tracking-wider">
+									<p>自營商</p>
+									<p>連買賣</p>
 								</th>
 								<th scope="col" class="text-center uppercase tracking-wider">
 									<p>大戶</p>
 									<p>買賣超</p>
+								</th>
+								<th scope="col" class="text-center uppercase tracking-wider">
+									<p>大戶</p>
+									<p>連買賣</p>
 								</th>
 								<th scope="col" class="text-center uppercase tracking-wider">融資增減</th>
 								<th scope="col" class="text-center uppercase tracking-wider">融資餘額</th>
@@ -98,6 +123,7 @@
 								<th scope="col" class="text-center uppercase tracking-wider">融券餘額</th>
 								<th scope="col" class="text-center uppercase tracking-wider">融資使用率</th>
 								<th scope="col" class="text-center uppercase tracking-wider">券資比</th>
+								<th scope="col" class="text-center uppercase tracking-wider">均線</th>
 								<th scope="col" class="text-center uppercase tracking-wider">布林通道</th>
 								<th scope="col" class="text-center uppercase tracking-wider">MACD</th>
 								{#if filterProps.isFlagType}
@@ -172,12 +198,22 @@
 										{toCurrency(stock.buySellInfo.foreign.remain)}
 									</td>
 									<td
+										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.foreign.today, 0)}"
+									>
+										{getBuySellDays(stock.buySellInfo.foreign.days)}
+									</td>
+									<td
 										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.sites.today, 0)}"
 									>
 										{toCurrency(stock.buySellInfo.sites.today)}
 									</td>
 									<td class="whitespace-nowrap text-sm text-gray-500">
 										{toCurrency(stock.buySellInfo.sites.remain)}
+									</td>
+									<td
+										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.sites.days, 0)}"
+									>
+										{getBuySellDays(stock.buySellInfo.sites.days)}
 									</td>
 									<td
 										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.dealer.today, 0)}"
@@ -188,9 +224,19 @@
 										{toCurrency(stock.buySellInfo.dealer.remain)}
 									</td>
 									<td
+										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.dealer.today, 0)}"
+									>
+										{getBuySellDays(stock.buySellInfo.dealer.days)}
+									</td>
+									<td
 										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.major.today, 0)}"
 									>
 										{toCurrency(stock.buySellInfo.major.today)}
+									</td>
+									<td
+										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.major.today, 0)}"
+									>
+										{getBuySellDays(stock.buySellInfo.major.days)}
 									</td>
 									<td
 										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.bsmInfo.marginPurchase.change, 0)}"
@@ -214,14 +260,24 @@
 									<td class="whitespace-nowrap text-sm text-gray-500">
 										{toCurrency(stock.bsmInfo.bsmRatio)}
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500 {styled.boolean}">
+									<td class="whitespace-nowrap text-sm text-gray-500 {styled.moreContent}">
+										<p>
+											5MA:{toCurrency(stock.priceInfo.priceMA[1])}
+											| 10MA:{toCurrency(stock.priceInfo.priceMA[2])}
+											| 20MA:{toCurrency(stock.priceInfo.priceMA[3])}
+											| 60MA:{toCurrency(stock.priceInfo.priceMA[4])}
+											| 120MA:{toCurrency(stock.priceInfo.priceMA[5])}
+											| 240MA:{toCurrency(stock.priceInfo.priceMA[6])}
+										</p>
+									</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {styled.moreContent}">
 										<p>
 											上軌:{toCurrency(stock.booleanInfo.top[0])}
 											| 下軌:{toCurrency(stock.booleanInfo.bottom[0])}
 											| 壓縮率:{toCurrency(stock.booleanInfo.compressionRatio[0])}%
 										</p>
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500 {styled.macd}">
+									<td class="whitespace-nowrap text-sm text-gray-500 {styled.moreContent}">
 										<p>
 											DIF:{stock.macdInfo.dif}
 											| MACD:{stock.macdInfo.macd}

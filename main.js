@@ -63,24 +63,24 @@ function createWindow() {
 				autoHideMenuBar: true, //  工具列不顯示
 			});
 
-			mainWindow.on('minimize', (e) => {
-				e.preventDefault();
-				mainWindow.minimize();
-			});
+			// mainWindow.on('minimize', (e) => {
+			// 	e.preventDefault();
+			// 	mainWindow.minimize();
+			// });
 
-			mainWindow.on('close', (e) => {
-				e.preventDefault();
-				mainWindow.hide();
-			});
+			// mainWindow.on('close', (e) => {
+			// 	e.preventDefault();
+			// 	mainWindow.hide();
+			// });
 
 			mainWindow.loadFile(`${app.getAppPath()}/public/index.html`);
 			if (process.env.NODE_ENV === 'dev') {
 				mainWindow.webContents.openDevTools();
 			}
 
-			mainWindow.on('closed', () => {
-				mainWindow = null;
-			});
+			// mainWindow.on('closed', () => {
+			// 	mainWindow = null;
+			// });
 		}
 	}, 500);
 }
@@ -94,10 +94,7 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
-	mainWindow && mainWindow.destroy();
-	if (process.platform !== 'darwin') {
-		app.quit();
-	}
+	app.quit();
 });
 app.on('activate', () => {
 	// On macOS it's common to re-create a window in the app when the
