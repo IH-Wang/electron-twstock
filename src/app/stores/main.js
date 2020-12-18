@@ -1,14 +1,7 @@
 import { writable } from 'svelte/store';
 import * as R from 'ramda';
 // constants
-import {
-	filterRiseDropTabs,
-	filterMaxMinTabs,
-	filterVolTabs,
-	filterMATypeTabs,
-	filterBuySellTabs,
-	DAYS,
-} from '../constants';
+import { filterRiseDropTabs, filterMaxMinTabs, filterVolTabs, filterMATypeTabs, filterBuySellTabs, DAYS } from '../constants';
 
 const mainConfig = {
 	marketTypeList: [],
@@ -16,10 +9,13 @@ const mainConfig = {
 	baseStockInfoList: [],
 	stockInfoList: [],
 	tags: [],
+	checkedMaxMinDays: [],
 	searchText: '',
-	maxPrice: 0,
-	minPrice: 0,
-	endPrice: 0,
+	refPrice: null,
+	startPrice: null,
+	maxPrice: null,
+	minPrice: null,
+	endPrice: null,
 	marketType: '',
 	category: -1,
 	current: 1,
@@ -34,7 +30,6 @@ const mainConfig = {
 	startRiseDropMargin: 0,
 	endRiseDropMargin: 0,
 	maxMinType: '',
-	selectedMaxMinIndex: 0,
 	priceVolType: '',
 	maReverseType: '',
 	selectedMAReverseIndex: 0,
@@ -151,6 +146,8 @@ const filterData = (props, data) => {
 // 過濾價量篩選
 const filterByPriceVol = (props, data) => {
 	const {
+		refPrice,
+		startPrice,
 		maxPrice,
 		minPrice,
 		endPrice,
@@ -158,7 +155,6 @@ const filterByPriceVol = (props, data) => {
 		isLimitDown,
 		riseDropType,
 		selectedRiseDropIndex,
-		selectedMaxMinIndex,
 		startRiseDropMargin,
 		endRiseDropMargin,
 		maxMinType,
@@ -167,8 +163,21 @@ const filterByPriceVol = (props, data) => {
 		selectedVolIndex,
 		fromVol,
 		toVol,
+		checkedMaxMinDays,
 	} = props;
 	let newData = data;
+	// 參考價
+	if (refPrice > 0) {
+		newData = newData.filter((stock) => stock.priceInfo.refPrice === refPrice);
+	}
+	// 開盤價
+	if (startPrice > 0) {
+		newData = newData.filter((stock) => stock.priceInfo.startPrice === startPrice);
+	}
+	// 最高價
+	if (maxPrice > 0) {
+		newData = newData.filter((stock) => stock.priceInfo.maxPrice === maxPrice);
+	}
 	// 最高價
 	if (maxPrice > 0) {
 		newData = newData.filter((stock) => stock.priceInfo.maxPrice === maxPrice);
@@ -226,11 +235,11 @@ const filterByPriceVol = (props, data) => {
 		}
 	}
 	// 近日新高新低
-	if (maxMinType) {
+	if (maxMinType && !R.isEmpty(checkedMaxMinDays)) {
 		newData = newData.filter((stock) =>
 			maxMinType === filterMaxMinTabs.max
-				? stock.priceInfo.endPrice === stock.priceInfo.maxMA[selectedMaxMinIndex]
-				: stock.priceInfo.endPrice === stock.priceInfo.minMA[selectedMaxMinIndex],
+				? checkedMaxMinDays.some((day) => stock.priceInfo.endPrice === stock.priceInfo.maxMA[DAYS.indexOf(day)])
+				: checkedMaxMinDays.some((day) => stock.priceInfo.endPrice === stock.priceInfo.minMA[DAYS.indexOf(day)]),
 		);
 	}
 	// 漲停、跌停
@@ -245,32 +254,16 @@ const filterByPriceVol = (props, data) => {
 	if (priceVolType) {
 		switch (priceVolType) {
 			case '價量齊揚':
-				newData = newData.filter(
-					(stock) =>
-						stock.priceInfo.riseDropMargin >= 5 &&
-						stock.volInfo.vol > stock.volInfo.volDays[DAYS.indexOf(20)],
-				);
+				newData = newData.filter((stock) => stock.priceInfo.riseDropMargin >= 5 && stock.volInfo.vol > stock.volInfo.volDays[DAYS.indexOf(20)]);
 				break;
 			case '價漲量縮':
-				newData = newData.filter(
-					(stock) =>
-						stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] >= 10 &&
-						stock.volInfo.vol < stock.volInfo.preVol,
-				);
+				newData = newData.filter((stock) => stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] >= 10 && stock.volInfo.vol < stock.volInfo.preVol);
 				break;
 			case '價跌量增':
-				newData = newData.filter(
-					(stock) =>
-						stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] <= -10 &&
-						stock.volInfo.vol > stock.volInfo.preVol,
-				);
+				newData = newData.filter((stock) => stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] <= -10 && stock.volInfo.vol > stock.volInfo.preVol);
 				break;
 			case '價跌量縮':
-				newData = newData.filter(
-					(stock) =>
-						stock.priceInfo.riseDropMargin <= -5 &&
-						stock.volInfo.vol < stock.volInfo.volDays[DAYS.indexOf(20)],
-				);
+				newData = newData.filter((stock) => stock.priceInfo.riseDropMargin <= -5 && stock.volInfo.vol < stock.volInfo.volDays[DAYS.indexOf(20)]);
 				break;
 			default:
 				break;
@@ -323,30 +316,22 @@ const filterByStrategy = (props, data) => {
 		switch (macdType) {
 			case '趨勢向上':
 				newData = newData.filter(
-					(stock) =>
-						!!stock.macdInfo.isIncreaseTrend &&
-						stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
+					(stock) => !!stock.macdInfo.isIncreaseTrend && stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
 				);
 				break;
 			case '趨勢向下':
 				newData = newData.filter(
-					(stock) =>
-						!!stock.macdInfo.isDeceaseTrend &&
-						stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
+					(stock) => !!stock.macdInfo.isDeceaseTrend && stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
 				);
 				break;
 			case '黃金交叉':
 				newData = newData.filter(
-					(stock) =>
-						!!stock.macdInfo.cross.isRed &&
-						stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
+					(stock) => !!stock.macdInfo.cross.isRed && stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
 				);
 				break;
 			case '死亡交叉':
 				newData = newData.filter(
-					(stock) =>
-						!!stock.macdInfo.cross.isGreen &&
-						stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
+					(stock) => !!stock.macdInfo.cross.isGreen && stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
 				);
 				break;
 		}
@@ -368,9 +353,7 @@ const filterByStrategy = (props, data) => {
 	}
 	if (isBooleanExpand) {
 		newData = newData.filter(
-			(stock) =>
-				stock.booleanInfo.compressionRatio[0] > stock.booleanInfo.compressionRatio[1] + 2.5 &&
-				stock.booleanInfo.compressionRatio[1] < 10,
+			(stock) => stock.booleanInfo.compressionRatio[0] > stock.booleanInfo.compressionRatio[1] + 2.5 && stock.booleanInfo.compressionRatio[1] < 10,
 		);
 	}
 	return newData;
@@ -486,7 +469,7 @@ const getFilterTag = (props) => {
 		isLimitDown,
 		riseDropType,
 		selectedRiseDropIndex,
-		selectedMaxMinIndex,
+		checkedMaxMinDays,
 		startRiseDropMargin,
 		endRiseDropMargin,
 		maxMinType,
@@ -544,8 +527,8 @@ const getFilterTag = (props) => {
 	if (fromVol || toVol) {
 		tags.push(`成交量 ${fromVol ? fromVol : 0}${toVol ? `~${toVol}` : ''}`);
 	}
-	if (maxMinType) {
-		tags.push(`近${DAYS[selectedMaxMinIndex]}日${maxMinType}`);
+	if (maxMinType && !R.isEmpty(checkedMaxMinDays)) {
+		tags.push(`近 ${checkedMaxMinDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${maxMinType}`);
 	}
 	if (priceVolType) {
 		tags.push(priceVolType);
@@ -628,9 +611,11 @@ const resetFilter = () =>
 			...props,
 			stockInfoList: props.baseStockInfoList,
 			searchText: '',
-			maxPrice: 0,
-			minPrice: 0,
-			endPrice: 0,
+			refPrice: null,
+			startPrice: null,
+			maxPrice: null,
+			minPrice: null,
+			endPrice: null,
 			marketType: '',
 			category: -1,
 			current: 1,
@@ -644,7 +629,6 @@ const resetFilter = () =>
 			startRiseDropMargin: 0,
 			endRiseDropMargin: 0,
 			maxMinType: '',
-			selectedMaxMinIndex: 0,
 			priceVolType: '',
 			maReverseType: '',
 			selectedMAReverseIndex: 0,
@@ -654,6 +638,7 @@ const resetFilter = () =>
 			activeDealerTab: '',
 			activeMajorTab: '',
 			tags: [],
+			checkedMaxMinDays: [],
 			isLimitUp: false,
 			isLimitDown: false,
 			isTangledMA: false,

@@ -1,25 +1,50 @@
 <style>
+	.square {
+		background-color: #fff;
+		border: 1px solid var(--theme-progressCircleBar);
+		border-radius: 6px;
+		cursor: pointer;
+		color: #333;
+	}
+	.square:hover {
+		color: gray;
+	}
+	.active {
+		background-color: var(--theme-progressCircleBar);
+		border: 1px solid #fff;
+		color: #fff;
+	}
+	.activeContent {
+		background-color: var(--theme-titleBarBG);
+		border-radius: 6px;
+	}
 </style>
 
 <script>
+	import { fly, crossfade, slide } from 'svelte/transition';
+	import { quintInOut } from 'svelte/easing';
 	// store
 	import MainStore from '../../stores/main';
 	// component
-	import TabPanel from '../common/tab/TabPanel.svelte';
-	// util
-	import { DAYS } from '../../util/stock';
+	// import TabPanel from '../common/tab/TabPanel.svelte';
+	import PriceContent from '../filter/Price.svelte';
+
 	// constants
-	import {
-		RISE_DROP,
-		MAX_MIN,
-		INCREASE_DECREASE,
-		filterRiseDropTabs,
-		filterMaxMinTabs,
-		filterVolTabs,
-	} from '../../constants';
+	import { RISE_DROP, MAX_MIN, INCREASE_DECREASE, filterRiseDropTabs, filterMaxMinTabs, filterVolTabs, DAYS } from '../../constants';
 	// style
 	import styled from './Filter.module.scss';
 	export let isReset = false;
+	const [send, receive] = crossfade({
+		duration: 300,
+		fallback: slide,
+	});
+	const priceVolList = [
+		{ text: '價格', value: 'price' },
+		{ text: '成交量', value: 'vol' },
+		{ text: '漲跌', value: 'riseDrop' },
+		{ text: '價量關係', value: 'priceVol' },
+	];
+	let activeTab = '';
 
 	const priceVolOptions = ['價量齊揚', '價漲量縮', '價跌量增', '價跌量縮'];
 	const selectDays = DAYS.map((day) => `${day} 日`);
@@ -39,6 +64,11 @@
 		selectedVolIndex = $MainStore.selectedVolIndex,
 		searchFromVol = $MainStore.fromVol,
 		searchToVol = $MainStore.toVol;
+
+	// 切換 tab
+	const changeActiveTab = (tab) => {
+		activeTab = activeTab === tab ? '' : tab;
+	};
 
 	const changePrice = (evt) => {
 		MainStore.filterByParams({ [evt.target.name]: evt.target.value ? Number(evt.target.value) : '' });
@@ -112,42 +142,20 @@
 	}
 </script>
 
-<TabPanel title="價格">
-	<div class="flex">
-		<span class="text-sm rounded-l w-16 px-2">最高</span>
-		<input
-			name="maxPrice"
-			class="focus:ring-indigo-500 rounded-md mx-1 w-full text-center"
-			type="number"
-			placeholder="最高價"
-			bind:value="{searchMaxPrice}"
-			on:input="{changePrice}"
-		/>
+<div class="flex flex-wrap" in:fly="{{ x: -1920, duration: 400, easing: quintInOut, opacity: 1 }}" out:fly="{{ x: 1920, duration: 200, easing: quintInOut }}">
+	{#each priceVolList as item}
+		<div class="flex-1 m-1 square text-center {activeTab === item.value ? 'active' : ''}" on:click="{() => changeActiveTab(item.value)}">{item.text}</div>
+	{/each}
+</div>
+{#if activeTab}
+	<div class="flex m-1 py-4 justify-center activeContent" in:receive="{{ key: activeTab }}" out:send="{{ key: activeTab }}">
+		{#if activeTab === 'price'}
+			<PriceContent />
+		{/if}
 	</div>
-	<div class="flex mt-1">
-		<span class="text-sm rounded-l px-2 w-16">最低</span>
-		<input
-			type="number"
-			name="minPrice"
-			bind:value="{searchMinPrice}"
-			on:input="{changePrice}"
-			placeholder="最低價"
-			class="focus:ring-indigo-500 rounded-md mx-1  w-full text-center"
-		/>
-	</div>
-	<div class="flex mt-1">
-		<span class="text-sm rounded-l px-2 w-16">收盤</span>
-		<input
-			type="number"
-			name="endPrice"
-			bind:value="{searchEndPrice}"
-			on:input="{changePrice}"
-			placeholder="收盤價"
-			class="focus:ring-indigo-500 rounded-md mx-1 w-full text-center"
-		/>
-	</div>
-</TabPanel>
-<TabPanel
+{/if}
+
+<!-- <TabPanel
 	title="成交量"
 	tabs="{Object.values(filterVolTabs)}"
 	changeTab="{changeTab(INCREASE_DECREASE)}"
@@ -257,4 +265,4 @@
 			</div>
 		{/each}
 	</div>
-</TabPanel>
+</TabPanel> -->

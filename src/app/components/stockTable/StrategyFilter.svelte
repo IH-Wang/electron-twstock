@@ -1,4 +1,6 @@
 <script>
+	import { fly } from 'svelte/transition';
+	import { quintInOut } from 'svelte/easing';
 	// store
 	import MainStore from '../../stores/main';
 	// component
@@ -99,96 +101,102 @@
 	}
 </script>
 
-<TabPanel
-	title="排列"
-	tabs="{Object.values(filterLongShortTabs)}"
-	changeTab="{changeTab(LONG_SHORT)}"
-	activeTab="{activeLongShortTab}"
+<div
+	class="flex flex-wrap"
+	in:fly="{{ x: -1920, duration: 400, easing: quintInOut, opacity: 1 }}"
+	out:fly="{{ x: 1920, duration: 200, easing: quintInOut }}"
 >
-	<div class="inline-flex mt-1 justify-around w-full">
-		<div>
-			<span>旗型</span>
-			<input
-				name="isFlagType"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isFlagType}"
-				disabled
-			/>
-		</div>
-		<div>
-			<span>破切</span>
-			<input
-				name="isReverse"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isReverse}"
-			/>
-		</div>
-	</div>
-</TabPanel>
-<TabPanel
-	title="均線"
-	tabs="{Object.values(filterMATypeTabs)}"
-	changeTab="{changeTab(UP_DOWN)}"
-	activeTab="{activeMAReverseTab}"
-	options="{selectDays}"
-	changeOption="{changeSelect(UP_DOWN)}"
-	selectedOption="{selectedMAReverseIndex}"
->
-	<div class="inline-flex mt-1 justify-around w-full">
-		<div>
-			<span>均線糾結</span>
-			<input
-				name="isTangledMA"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isTangledMA}"
-			/>
-		</div>
-	</div>
-</TabPanel>
-<TabPanel
-	title="布林"
-	tabs="{Object.values(filterBooleanTabs)}"
-	changeTab="{changeTab(TOP_BOTTOM)}"
-	activeTab="{activeBooleanTab}"
->
-	<div class="inline-flex mt-1 justify-around w-full">
-		<div>
-			<span>布林壓縮</span>
-			<input
-				name="isBooleanCompression"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isBooleanCompression}"
-			/>
-		</div>
-		<div>
-			<span>打開布林</span>
-			<input
-				name="isBooleanExpand"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isBooleanExpand}"
-			/>
-		</div>
-	</div>
-</TabPanel>
-<TabPanel title="MACD">
-	<div class="flex flex-wrap {styled.filterBtn}">
-		{#each macdOptions as option}
-			<div
-				class="{selectMACDType === option ? styled.active : ''} text-sm w-1/2 border py-2 cursor-pointer hover:border-blue-500 hover:text-gray-500"
-				on:click="{changeMACDType(option)}"
-			>
-				{option}
+	<TabPanel
+		title="排列"
+		tabs="{Object.values(filterLongShortTabs)}"
+		changeTab="{changeTab(LONG_SHORT)}"
+		activeTab="{activeLongShortTab}"
+	>
+		<div class="inline-flex mt-1 justify-around w-full">
+			<div>
+				<span>旗型</span>
+				<input
+					name="isFlagType"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isFlagType}"
+					disabled
+				/>
 			</div>
-		{/each}
-	</div>
-</TabPanel>
+			<div>
+				<span>破切</span>
+				<input
+					name="isReverse"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isReverse}"
+				/>
+			</div>
+		</div>
+	</TabPanel>
+	<TabPanel
+		title="均線"
+		tabs="{Object.values(filterMATypeTabs)}"
+		changeTab="{changeTab(UP_DOWN)}"
+		activeTab="{activeMAReverseTab}"
+		options="{selectDays}"
+		changeOption="{changeSelect(UP_DOWN)}"
+		selectedOption="{selectedMAReverseIndex}"
+	>
+		<div class="inline-flex mt-1 justify-around w-full">
+			<div>
+				<span>均線糾結</span>
+				<input
+					name="isTangledMA"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isTangledMA}"
+				/>
+			</div>
+		</div>
+	</TabPanel>
+	<TabPanel
+		title="布林"
+		tabs="{Object.values(filterBooleanTabs)}"
+		changeTab="{changeTab(TOP_BOTTOM)}"
+		activeTab="{activeBooleanTab}"
+	>
+		<div class="inline-flex mt-1 justify-around w-full">
+			<div>
+				<span>布林壓縮</span>
+				<input
+					name="isBooleanCompression"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isBooleanCompression}"
+				/>
+			</div>
+			<div>
+				<span>打開布林</span>
+				<input
+					name="isBooleanExpand"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isBooleanExpand}"
+				/>
+			</div>
+		</div>
+	</TabPanel>
+	<TabPanel title="MACD">
+		<div class="flex flex-wrap {styled.filterBtn}">
+			{#each macdOptions as option}
+				<div
+					class="{selectMACDType === option ? styled.active : ''} text-sm w-1/2 border py-2 cursor-pointer hover:border-blue-500 hover:text-gray-500"
+					on:click="{changeMACDType(option)}"
+				>
+					{option}
+				</div>
+			{/each}
+		</div>
+	</TabPanel>
+</div>

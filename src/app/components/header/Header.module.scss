@@ -21,23 +21,18 @@
 }
 
 .titleControl {
-	flex: 1;
-	> ul {
-		margin: 0;
-		display: flex;
-		align-items: center;
-		> li {
-			display: inline-flex;
-			-webkit-app-region: no-drag;
-		}
+	margin: 0;
+	display: flex;
+	align-items: center;
+	> li {
+		display: inline-flex;
+		-webkit-app-region: no-drag;
 	}
 }
 .toggle {
 	border-radius: 0.8em;
 	background-color: var(--theme-titleBarSwitchBG);
-}
-.toggleIcon {
-	color: var(--theme-titleBarSwitchText);
+	-webkit-app-region: no-drag;
 }
 
 .titleButton {

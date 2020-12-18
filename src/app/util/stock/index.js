@@ -1,6 +1,6 @@
 import * as ramda from 'ramda';
 import { numRound, numFloor } from '../math';
-export const DAYS = [3, 5, 10, 20, 60, 120, 240];
+import { DAYS } from '../../constants';
 const movingAverage = (data, days) => {
 	const movingList = data.slice(days * -1);
 	return numRound(ramda.mean(movingList), 2);
@@ -90,31 +90,21 @@ class StockUtil {
 		const riseDropMargin = numRound(((endPrice - refPrice) / refPrice) * 100, 2);
 		// 判斷 5,10,20 日均線糾結
 		const isTangledMA = riskMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((risk) => risk >= -2 && risk <= 3);
 		// 判斷前一天 5, 10, 20 日均線糾結
 		const prePriceMA = DAYS.map((day) => movingAverage(endPriceList.slice(0, -1), day));
-		const preRiskMA = DAYS.map((day) =>
-			numRound(((refPrice - movingAverage(endPriceList.slice(0, -1), day)) / refPrice) * 100, 2),
-		);
+		const preRiskMA = DAYS.map((day) => numRound(((refPrice - movingAverage(endPriceList.slice(0, -1), day)) / refPrice) * 100, 2));
 		const isPreTangledMA = preRiskMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((risk) => risk >= -2 && risk <= 3);
 		// 收盤價在 5, 10, 20 日均線之上
 		const isOverPrePriceMA = prePriceMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((price) => price < endPrice);
 		// 收盤價在 5, 10, 20 日均線之下
 		const isUnderPrePriceMA = prePriceMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((price) => price > endPrice);
 		// 突破均線糾結
 		const isBreakTangled = riseDropMargin > 4 && isOverPrePriceMA && isPreTangledMA;
@@ -131,13 +121,9 @@ class StockUtil {
 			priceMA[DAYS.indexOf(10)] < priceMA[DAYS.indexOf(20)] &&
 			priceMA[DAYS.indexOf(20)] < priceMA[DAYS.indexOf(60)];
 		// 判斷漲停
-		const isLimitUp =
-			riseDropPrice > 0 &&
-			riseDropPrice === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
+		const isLimitUp = riseDropPrice > 0 && riseDropPrice === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
 		// 判斷跌停
-		const isLimitDown =
-			riseDropPrice < 0 &&
-			Math.abs(riseDropPrice) === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
+		const isLimitDown = riseDropPrice < 0 && Math.abs(riseDropPrice) === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
 		// 判斷均線均線上彎
 		const maReverseUp = DAYS.map(
 			(day) =>
@@ -179,12 +165,7 @@ class StockUtil {
 			},
 			riseDropDays: {
 				price: DAYS.map((day) => numRound(endPrice - getNDayAgoStock(endPriceList, day), 2)),
-				margin: DAYS.map((day) =>
-					numRound(
-						((endPrice - getNDayAgoStock(endPriceList, day)) / getNDayAgoStock(endPriceList, day)) * 100,
-						2,
-					),
-				),
+				margin: DAYS.map((day) => numRound(((endPrice - getNDayAgoStock(endPriceList, day)) / getNDayAgoStock(endPriceList, day)) * 100, 2)),
 			},
 		};
 	}
@@ -219,10 +200,7 @@ class StockUtil {
 		let flagLevel = 99;
 		let flagVolRatio = 0;
 		// 隔日開平盤的5MA(假定)
-		const priceNext5MA = numRound(
-			(movingAverage(endPriceList, 5) * 5 - getNDayAgoStock(endPriceList, 5) + price) / 5,
-			2,
-		);
+		const priceNext5MA = numRound((movingAverage(endPriceList, 5) * 5 - getNDayAgoStock(endPriceList, 5) + price) / 5, 2);
 		for (let i = 3; i <= 10; i++) {
 			// 前N日之收盤價
 			const calcPrice = getNDayAgoStock(endPriceList, i);
@@ -375,8 +353,7 @@ class StockUtil {
 			}
 		}
 		if (reverseInfo.isReverse) {
-			reverseInfo.reverseType =
-				startPrice > preMaxPrice ? '跳空站上' : startPrice > dropTrendPrice ? '底部站上' : '';
+			reverseInfo.reverseType = startPrice > preMaxPrice ? '跳空站上' : startPrice > dropTrendPrice ? '底部站上' : '';
 		}
 		return reverseInfo;
 	}
@@ -492,9 +469,7 @@ class StockUtil {
 		const endPriceList = stockList.map((stock) => stock.endPrice);
 		const price20MAList = stockList
 			.slice(-20)
-			.map((price, index) =>
-				numRound(movingAverage(endPriceList.slice(0, index === 19 ? undefined : -19 + index), 20), 2),
-			);
+			.map((price, index) => numRound(movingAverage(endPriceList.slice(0, index === 19 ? undefined : -19 + index), 20), 2));
 
 		let total = 0;
 		let preTotal = 0;

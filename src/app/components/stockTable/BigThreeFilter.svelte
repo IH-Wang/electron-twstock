@@ -1,4 +1,6 @@
 <script>
+	import { fly } from 'svelte/transition';
+	import { quintInOut } from 'svelte/easing';
 	// store
 	import MainStore from '../../stores/main';
 	// component
@@ -81,102 +83,108 @@
 	}
 </script>
 
-<TabPanel
-	title="外資"
-	tabs="{Object.values(filterBuySellTabs)}"
-	changeTab="{changeTab(FOREIGN)}"
-	activeTab="{activeForeignTab}"
+<div
+	class="flex flex-wrap"
+	in:fly="{{ x: -1920, duration: 400, easing: quintInOut, opacity: 1 }}"
+	out:fly="{{ x: 1920, duration: 200, easing: quintInOut }}"
 >
-	<div class="inline-flex mt-1 justify-around w-full">
-		<div>
-			<span>進場</span>
-			<input
-				name="isForeignEnter"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isForeignEnter}"
-			/>
-		</div>
-		<div>
-			<span>出場</span>
-			<input
-				name="isForeignExit"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isForeignExit}"
-			/>
-		</div>
-	</div>
-</TabPanel>
-<TabPanel
-	title="投信"
-	tabs="{Object.values(filterBuySellTabs)}"
-	changeTab="{changeTab(SITES)}"
-	activeTab="{activeSitesTab}"
->
-	<div class="inline-flex mt-1 justify-around w-full">
-		<div>
-			<span>進場</span>
-			<input
-				name="isSitesEnter"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isSitesEnter}"
-			/>
-		</div>
-		<div>
-			<span>出場</span>
-			<input
-				name="isSitesExit"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isSitesExit}"
-			/>
-		</div>
-	</div>
-</TabPanel>
-<TabPanel
-	title="自營商"
-	tabs="{Object.values(filterBuySellTabs)}"
-	changeTab="{changeTab(DEALER)}"
-	activeTab="{activeDealerTab}"
->
-	<div class="inline-flex mt-1 justify-around w-full">
-		<div>
-			<span>進場</span>
-			<input
-				name="isDealerEnter"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isDealerEnter}"
-			/>
-		</div>
-		<div>
-			<span>出場</span>
-			<input
-				name="isDealerExit"
-				type="checkbox"
-				class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-				on:change="{changeFilterCheck}"
-				bind:checked="{isDealerExit}"
-			/>
-		</div>
-	</div>
-</TabPanel>
-<TabPanel title="大戶">
-	<div class="flex flex-wrap {styled.filterBtn}">
-		{#each majorOptions as option}
-			<div
-				class="{selectMajorTab === option ? styled.active : ''} text-sm w-1/2 border py-2 cursor-pointer hover:border-blue-500 hover:text-gray-500"
-				on:click="{changeMajorType(option)}"
-			>
-				{option}
+	<TabPanel
+		title="外資"
+		tabs="{Object.values(filterBuySellTabs)}"
+		changeTab="{changeTab(FOREIGN)}"
+		activeTab="{activeForeignTab}"
+	>
+		<div class="inline-flex mt-1 justify-around w-full">
+			<div>
+				<span>進場</span>
+				<input
+					name="isForeignEnter"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isForeignEnter}"
+				/>
 			</div>
-		{/each}
-	</div>
-</TabPanel>
+			<div>
+				<span>出場</span>
+				<input
+					name="isForeignExit"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isForeignExit}"
+				/>
+			</div>
+		</div>
+	</TabPanel>
+	<TabPanel
+		title="投信"
+		tabs="{Object.values(filterBuySellTabs)}"
+		changeTab="{changeTab(SITES)}"
+		activeTab="{activeSitesTab}"
+	>
+		<div class="inline-flex mt-1 justify-around w-full">
+			<div>
+				<span>進場</span>
+				<input
+					name="isSitesEnter"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isSitesEnter}"
+				/>
+			</div>
+			<div>
+				<span>出場</span>
+				<input
+					name="isSitesExit"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isSitesExit}"
+				/>
+			</div>
+		</div>
+	</TabPanel>
+	<TabPanel
+		title="自營商"
+		tabs="{Object.values(filterBuySellTabs)}"
+		changeTab="{changeTab(DEALER)}"
+		activeTab="{activeDealerTab}"
+	>
+		<div class="inline-flex mt-1 justify-around w-full">
+			<div>
+				<span>進場</span>
+				<input
+					name="isDealerEnter"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isDealerEnter}"
+				/>
+			</div>
+			<div>
+				<span>出場</span>
+				<input
+					name="isDealerExit"
+					type="checkbox"
+					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+					on:change="{changeFilterCheck}"
+					bind:checked="{isDealerExit}"
+				/>
+			</div>
+		</div>
+	</TabPanel>
+	<TabPanel title="大戶">
+		<div class="flex flex-wrap {styled.filterBtn}">
+			{#each majorOptions as option}
+				<div
+					class="{selectMajorTab === option ? styled.active : ''} text-sm w-1/2 border py-2 cursor-pointer hover:border-blue-500 hover:text-gray-500"
+					on:click="{changeMajorType(option)}"
+				>
+					{option}
+				</div>
+			{/each}
+		</div>
+	</TabPanel>
+</div>

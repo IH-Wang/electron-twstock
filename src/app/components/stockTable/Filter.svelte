@@ -3,9 +3,17 @@
 		outline: none;
 		box-shadow: 0 0 0 2px var(--theme-inputFocusBorder);
 	}
+
+	.reset {
+		background-color: var(--theme-progressCircleBar);
+	}
+	.reset:hover {
+		color: #ccc;
+	}
 </style>
 
 <script>
+	// import { crossfade, slide } from 'svelte/transition';
 	// store
 	import MainStore from '../../stores/main';
 	// component
@@ -96,7 +104,7 @@
 
 		<div class="flex flex-1 justify-end">
 			<button
-				class="border border-blue-500 bg-blue-500 text-white rounded-md px-4 transition duration-500 ease select-none hover:bg-blue-600 focus:outline-none focus:shadow-outline"
+				class="border reset text-white rounded-md px-4 transition duration-500 ease select-none hover:bg-blue-600 focus:outline-none focus:shadow-outline"
 				on:click="{resetFilter}"
 			>重設</button>
 		</div>
@@ -104,7 +112,8 @@
 	<div class="mt-2">
 		<Tab tabs="{tabs}" bind:activeTab changeTab="{changeTab}" />
 	</div>
-	<div class="mt-2 flex flex-wrap">
+
+	<div class="mt-2 flex flex-col w-full">
 		{#if activeTab === filterTabOption.priceVol}
 			<PriceVolFilter bind:isReset />
 		{:else if activeTab === filterTabOption.strategy}
@@ -113,6 +122,9 @@
 			<BigThreeFilter bind:isReset />
 		{/if}
 	</div>
+	<!-- <div class="mt-2 ">
+			<div class="bg-blue-500" in:receive="{{ key: activeTab }}" out:send="{{ key: activeTab }}">123</div>
+		</div> -->
 	<div class="mt-2 flex flex-wrap">
 		{#each $MainStore.tags as tag}
 			<div class="border border-blue-500 bg-blue-500 text-white mx-1 px-1">{tag}</div>
