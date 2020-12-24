@@ -1,10 +1,12 @@
 <style>
-	input:focus {
+	input:focus,
+	select:focus {
 		outline: none;
 		box-shadow: 0 0 0 2px var(--theme-inputFocusBorder);
 	}
 
-	.reset {
+	.reset,
+	.tag {
 		background-color: var(--theme-progressCircleBar);
 	}
 	.reset:hover {
@@ -75,12 +77,7 @@
 		</div>
 		<div class="mx-2">
 			<span>市場</span>
-			<select
-				name="marketType"
-				bind:value="{selectMarketType}"
-				class="mt-1 inline-flex px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				on:blur="{changeMarketType}"
-			>
+			<select name="marketType" bind:value="{selectMarketType}" class="inline-flex px-4 bg-white rounded-md h-full" on:blur="{changeMarketType}">
 				<option value="">全部</option>
 				{#each $MainStore.marketTypeList as market}
 					<option value="{market}">{market}</option>
@@ -89,12 +86,7 @@
 		</div>
 		<div class="mx-2">
 			<span>產業</span>
-			<select
-				name="category"
-				bind:value="{selectCategory}"
-				class="mt-1 inline-flex px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				on:blur="{changeCategory}"
-			>
+			<select name="category" bind:value="{selectCategory}" class="inline-flex px-4 bg-white rounded-md h-full" on:blur="{changeCategory}">
 				<option value="{-1}">全部</option>
 				{#each $MainStore.categoryList as category}
 					<option value="{category}">{!category ? '無' : category}</option>
@@ -122,12 +114,9 @@
 			<BigThreeFilter bind:isReset />
 		{/if}
 	</div>
-	<!-- <div class="mt-2 ">
-			<div class="bg-blue-500" in:receive="{{ key: activeTab }}" out:send="{{ key: activeTab }}">123</div>
-		</div> -->
 	<div class="mt-2 flex flex-wrap">
 		{#each $MainStore.tags as tag}
-			<div class="border border-blue-500 bg-blue-500 text-white mx-1 px-1">{tag}</div>
+			<div class="border tag text-white mx-1 px-1">{tag}</div>
 		{/each}
 	</div>
 </div>

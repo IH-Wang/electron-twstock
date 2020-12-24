@@ -1,5 +1,5 @@
 import * as ramda from 'ramda';
-import { numRound, numFloor } from '../math';
+import { numRound } from '../math';
 import { DAYS } from '../../constants';
 const movingAverage = (data, days) => {
 	const movingList = data.slice(days * -1);
@@ -71,6 +71,65 @@ const calculateEMA = (mArray, mRange) => {
 	return emaArray;
 };
 
+const calculateLimitPrice = (price) => {
+	const limitUpPrice = price * 1.1;
+	const limitDownPrice = price * 0.9;
+	if (limitUpPrice < 10 && limitDownPrice < 10) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice * 100) * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice * 100) * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice > 10 && limitDownPrice < 10) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice * 100) * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 10 && limitDownPrice >= 10 && limitUpPrice <= 50 && limitDownPrice < 50) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 50 && limitDownPrice < 50) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 50 && limitDownPrice >= 50 && limitUpPrice < 100 && limitDownPrice < 100) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 100 && limitDownPrice < 100) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 100 && limitDownPrice >= 100 && limitUpPrice < 1000 && limitDownPrice < 1000) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 1000 && limitDownPrice < 1000) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 5) * 5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 1000 && limitDownPrice >= 1000) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 5) * 5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 5) * 5 * 100 * 100) / 100 / 100,
+		};
+	}
+};
+
 class StockUtil {
 	// 取得 price 相關資訊
 	static getPriceInfo(stockInfo, stockList) {
@@ -120,10 +179,12 @@ class StockUtil {
 			priceMA[DAYS.indexOf(5)] < priceMA[DAYS.indexOf(10)] &&
 			priceMA[DAYS.indexOf(10)] < priceMA[DAYS.indexOf(20)] &&
 			priceMA[DAYS.indexOf(20)] < priceMA[DAYS.indexOf(60)];
-		// 判斷漲停
-		const isLimitUp = riseDropPrice > 0 && riseDropPrice === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
-		// 判斷跌停
-		const isLimitDown = riseDropPrice < 0 && Math.abs(riseDropPrice) === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
+		// 判斷漲停跌停
+		const limitPrice = calculateLimitPrice(refPrice);
+		const isLimitUp = endPrice === limitPrice.up;
+		const isLimitDown = endPrice === limitPrice.down;
+		const isLimitUpOnce = maxPrice === limitPrice.up && endPrice !== limitPrice.up;
+		const isLimitDownOnce = minPrice === limitPrice.down && endPrice !== limitPrice.down;
 		// 判斷均線均線上彎
 		const maReverseUp = DAYS.map(
 			(day) =>
@@ -159,6 +220,8 @@ class StockUtil {
 			isShortOrder,
 			isLimitUp,
 			isLimitDown,
+			isLimitUpOnce,
+			isLimitDownOnce,
 			maReverse: {
 				up: maReverseUp,
 				down: maReverseDown,
@@ -180,6 +243,8 @@ class StockUtil {
 			preVol,
 			volRatio: numRound(vol / preVol, 2),
 			volDays: DAYS.map((day) => numRound(movingAverage(volList, day), 0)),
+			maxVolDays: DAYS.map((day) => Math.max(...volList.slice(-day))),
+			minVolDays: DAYS.map((day) => Math.min(...volList.slice(-day))),
 			volDaysRatio: DAYS.map((day) => numRound(vol / movingAverage(volList, day), 2)),
 		};
 	}

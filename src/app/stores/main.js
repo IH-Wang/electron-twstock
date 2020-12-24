@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import * as R from 'ramda';
 // constants
-import { filterRiseDropTabs, filterMaxMinTabs, filterVolTabs, filterMATypeTabs, filterBuySellTabs, DAYS } from '../constants';
+import { filterRiseDropTabs, filterHighLowTabs, filterMATypeTabs, filterBuySellTabs, DAYS } from '../constants';
 
 const mainConfig = {
 	marketTypeList: [],
@@ -9,7 +9,9 @@ const mainConfig = {
 	baseStockInfoList: [],
 	stockInfoList: [],
 	tags: [],
-	checkedMaxMinDays: [],
+	checkedPriceHighLowDays: [],
+	checkedVolHighLowDays: [],
+	checkedRiseDropMarginDays: [],
 	searchText: '',
 	refPrice: null,
 	startPrice: null,
@@ -21,15 +23,14 @@ const mainConfig = {
 	current: 1,
 	totalItems: 0,
 	perPage: 10,
-	volType: '',
-	selectedVolIndex: 0,
+	selectedVol: 0,
 	fromVol: 0,
 	toVol: 0,
-	riseDropType: '',
-	selectedRiseDropIndex: 0,
-	startRiseDropMargin: 0,
-	endRiseDropMargin: 0,
-	maxMinType: '',
+	riseDropMarginType: '',
+	fromRiseDropMargin: 0,
+	toRiseDropMargin: 0,
+	priceHighLowType: '',
+	volHighLowType: '',
 	priceVolType: '',
 	maReverseType: '',
 	selectedMAReverseIndex: 0,
@@ -39,6 +40,7 @@ const mainConfig = {
 	activeDealerTab: '',
 	activeMajorTab: '',
 
+	isHeavyTrading: false,
 	isLimitUp: false,
 	isLimitDown: false,
 	isTangledMA: false,
@@ -153,17 +155,19 @@ const filterByPriceVol = (props, data) => {
 		endPrice,
 		isLimitUp,
 		isLimitDown,
-		riseDropType,
-		selectedRiseDropIndex,
-		startRiseDropMargin,
-		endRiseDropMargin,
-		maxMinType,
+		riseDropMarginType,
+		checkedRiseDropMarginDays,
+		fromRiseDropMargin,
+		toRiseDropMargin,
+		priceHighLowType,
 		priceVolType,
-		volType,
-		selectedVolIndex,
+		checkedVolHighLowDays,
+		selectedVol,
 		fromVol,
 		toVol,
-		checkedMaxMinDays,
+		volHighLowType,
+		checkedPriceHighLowDays,
+		isHeavyTrading,
 	} = props;
 	let newData = data;
 	// 參考價
@@ -190,58 +194,67 @@ const filterByPriceVol = (props, data) => {
 	if (endPrice > 0) {
 		newData = newData.filter((stock) => stock.priceInfo.endPrice === endPrice);
 	}
-	// 量突破或低於成交均量
-	if (volType) {
-		if (volType === filterVolTabs.increase) {
-			newData = newData.filter((stock) => stock.volInfo.vol > stock.volInfo.volDays[selectedVolIndex]);
-		} else {
-			newData = newData.filter((stock) => stock.volInfo.vol < stock.volInfo.volDays[selectedVolIndex]);
-		}
-	}
-	// 成交量範圍查詢
-	if (fromVol || toVol) {
-		if (fromVol && toVol) {
-			newData = newData.filter((stock) => stock.volInfo.vol >= fromVol && stock.volInfo.vol <= toVol);
-		} else if (fromVol && !toVol) {
-			newData = newData.filter((stock) => stock.volInfo.vol >= fromVol);
-		} else {
-			newData = newData.filter((stock) => stock.volInfo.vol <= toVol);
-		}
-	}
-	// 近日漲跌幅
-	if (riseDropType && (startRiseDropMargin || endRiseDropMargin)) {
-		if (riseDropType === filterRiseDropTabs.rise) {
-			newData = newData.filter((stock) => {
-				const margin = stock.priceInfo.riseDropDays.margin[selectedRiseDropIndex];
-				if (startRiseDropMargin && endRiseDropMargin) {
-					return margin >= startRiseDropMargin && margin <= endRiseDropMargin;
-				} else if (startRiseDropMargin && !endRiseDropMargin) {
-					return margin >= startRiseDropMargin;
-				} else {
-					return margin <= endRiseDropMargin;
-				}
-			});
-		} else {
-			newData = newData.filter((stock) => {
-				const margin = stock.priceInfo.riseDropDays.margin[selectedRiseDropIndex];
-				if (startRiseDropMargin && endRiseDropMargin) {
-					return margin <= startRiseDropMargin * -1 && margin >= endRiseDropMargin * -1;
-				} else if (startRiseDropMargin && !endRiseDropMargin) {
-					return margin <= startRiseDropMargin * -1;
-				} else {
-					return margin >= endRiseDropMargin * -1;
-				}
-			});
-		}
-	}
-	// 近日新高新低
-	if (maxMinType && !R.isEmpty(checkedMaxMinDays)) {
+
+	// 近日收盤價新高新低
+	if (priceHighLowType && !R.isEmpty(checkedPriceHighLowDays)) {
 		newData = newData.filter((stock) =>
-			maxMinType === filterMaxMinTabs.max
-				? checkedMaxMinDays.some((day) => stock.priceInfo.endPrice === stock.priceInfo.maxMA[DAYS.indexOf(day)])
-				: checkedMaxMinDays.some((day) => stock.priceInfo.endPrice === stock.priceInfo.minMA[DAYS.indexOf(day)]),
+			priceHighLowType === filterHighLowTabs.high
+				? checkedPriceHighLowDays.some((day) => stock.priceInfo.endPrice === stock.priceInfo.maxMA[DAYS.indexOf(day)])
+				: checkedPriceHighLowDays.some((day) => stock.priceInfo.endPrice === stock.priceInfo.minMA[DAYS.indexOf(day)]),
 		);
 	}
+
+	// 成交量範圍查詢
+	if (fromVol || toVol) {
+		newData = newData.filter((stock) => {
+			const vol = selectedVol === 0 ? stock.volInfo.vol : stock.volInfo.volDays[DAYS.indexOf(selectedVol)];
+			return (!fromVol || vol >= fromVol) && (!toVol || vol <= toVol);
+		});
+	}
+	// 近日成交量新高新低
+	if (volHighLowType && !R.isEmpty(checkedVolHighLowDays)) {
+		newData = newData.filter((stock) =>
+			volHighLowType === filterHighLowTabs.high
+				? checkedVolHighLowDays.some((day) => stock.volInfo.vol === stock.volInfo.maxVolDays[DAYS.indexOf(day)])
+				: checkedVolHighLowDays.some((day) => stock.volInfo.vol === stock.volInfo.minVolDays[DAYS.indexOf(day)]),
+		);
+	}
+	if (isHeavyTrading) {
+		newData = newData.filter((stock) => stock.volInfo.vol > stock.volInfo.volDays[DAYS.indexOf(5)] * 3);
+	}
+	// 近日漲跌幅
+	if (riseDropMarginType && (fromRiseDropMargin || toRiseDropMargin)) {
+		if (riseDropMarginType === filterRiseDropTabs.rise) {
+			newData = newData.filter((stock) => {
+				if (R.isEmpty(checkedRiseDropMarginDays)) {
+					return (
+						(!fromRiseDropMargin || stock.priceInfo.riseDropMargin >= fromRiseDropMargin) &&
+						(!toRiseDropMargin || stock.priceInfo.riseDropMargin <= toRiseDropMargin)
+					);
+				}
+				return checkedRiseDropMarginDays.some(
+					(day) =>
+						(!fromRiseDropMargin || stock.priceInfo.riseDropDays.margin[DAYS.indexOf(day)] >= fromRiseDropMargin) &&
+						(!toRiseDropMargin || stock.priceInfo.riseDropDays.margin[DAYS.indexOf(day)] <= toRiseDropMargin),
+				);
+			});
+		} else {
+			newData = newData.filter((stock) => {
+				if (R.isEmpty(checkedRiseDropMarginDays)) {
+					return (
+						(!fromRiseDropMargin || stock.priceInfo.riseDropMargin <= fromRiseDropMargin * -1) &&
+						(!toRiseDropMargin || stock.priceInfo.riseDropMargin >= toRiseDropMargin * -1)
+					);
+				}
+				return checkedRiseDropMarginDays.some(
+					(day) =>
+						(!fromRiseDropMargin || stock.priceInfo.riseDropDays.margin[DAYS.indexOf(day)] <= fromRiseDropMargin * -1) &&
+						(!toRiseDropMargin || stock.priceInfo.riseDropDays.margin[DAYS.indexOf(day)] >= toRiseDropMargin * -1),
+				);
+			});
+		}
+	}
+
 	// 漲停、跌停
 	if (isLimitUp && isLimitDown) {
 		newData = newData.filter((stock) => !!stock.priceInfo.isLimitUp || !!stock.priceInfo.isLimitDown);
@@ -467,17 +480,19 @@ const getFilterTag = (props) => {
 	const {
 		isLimitUp,
 		isLimitDown,
-		riseDropType,
-		selectedRiseDropIndex,
-		checkedMaxMinDays,
-		startRiseDropMargin,
-		endRiseDropMargin,
-		maxMinType,
+		riseDropMarginType,
+		checkedPriceHighLowDays,
+		checkedVolHighLowDays,
+		checkedRiseDropMarginDays,
+		fromRiseDropMargin,
+		toRiseDropMargin,
+		priceHighLowType,
 		priceVolType,
-		volType,
-		selectedVolIndex,
+		volHighLowType,
+		selectedVol,
 		fromVol,
 		toVol,
+		isHeavyTrading,
 		maReverseType,
 		isLongOrder,
 		isShortOrder,
@@ -510,25 +525,24 @@ const getFilterTag = (props) => {
 	if (isLimitDown) {
 		tags.push('跌停');
 	}
-	if (riseDropType && (startRiseDropMargin || endRiseDropMargin)) {
-		tags.push(
-			`${DAYS[selectedRiseDropIndex]}日${riseDropType} ${startRiseDropMargin ? startRiseDropMargin : 0}${
-				endRiseDropMargin ? `~${endRiseDropMargin}` : ''
-			}%`,
-		);
-	}
-	if (volType) {
-		if (volType === filterVolTabs.increase) {
-			tags.push(`超過${DAYS[selectedVolIndex]}日均量`);
+	if (riseDropMarginType && (fromRiseDropMargin || toRiseDropMargin)) {
+		if (R.isEmpty(checkedRiseDropMarginDays)) {
+			tags.push(`當日${riseDropMarginType}`);
 		} else {
-			tags.push(`低於${DAYS[selectedVolIndex]}日均量`);
+			tags.push(`近 ${checkedRiseDropMarginDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${riseDropMarginType}`);
 		}
 	}
-	if (fromVol || toVol) {
-		tags.push(`成交量 ${fromVol ? fromVol : 0}${toVol ? `~${toVol}` : ''}`);
+	if (priceHighLowType && !R.isEmpty(checkedPriceHighLowDays)) {
+		tags.push(`收盤價近 ${checkedPriceHighLowDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${priceHighLowType}`);
 	}
-	if (maxMinType && !R.isEmpty(checkedMaxMinDays)) {
-		tags.push(`近 ${checkedMaxMinDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${maxMinType}`);
+	if (fromVol || toVol) {
+		tags.push(`${selectedVol === 0 ? '成交量' : `${selectedVol}日均量`} ${!toVol ? '>' : ''} ${fromVol > 0 ? fromVol : 0}${toVol > 0 ? `~${toVol}` : ''}`);
+	}
+	if (volHighLowType && !R.isEmpty(checkedVolHighLowDays)) {
+		tags.push(`成交量近 ${checkedVolHighLowDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${volHighLowType}`);
+	}
+	if (isHeavyTrading) {
+		tags.push(`爆大量`);
 	}
 	if (priceVolType) {
 		tags.push(priceVolType);
@@ -621,14 +635,14 @@ const resetFilter = () =>
 			current: 1,
 			totalItems: props.baseStockInfoList.length,
 			volType: '',
-			selectedVolIndex: 0,
+			selectedVol: 0,
 			fromVol: 0,
 			toVol: 0,
-			riseDropType: '',
-			selectedRiseDropIndex: 0,
-			startRiseDropMargin: 0,
-			endRiseDropMargin: 0,
-			maxMinType: '',
+			riseDropMarginType: '',
+			fromRiseDropMargin: 0,
+			toRiseDropMargin: 0,
+			priceHighLowType: '',
+			volHighLowType: '',
 			priceVolType: '',
 			maReverseType: '',
 			selectedMAReverseIndex: 0,
@@ -638,7 +652,9 @@ const resetFilter = () =>
 			activeDealerTab: '',
 			activeMajorTab: '',
 			tags: [],
-			checkedMaxMinDays: [],
+			checkedPriceHighLowDays: [],
+			checkedVolHighLowDays: [],
+			checkedRiseDropMarginDays: [],
 			isLimitUp: false,
 			isLimitDown: false,
 			isTangledMA: false,
@@ -660,11 +676,28 @@ const resetFilter = () =>
 			isDealerExit: false,
 			isMajorContinuousBuy: false,
 			isMajorContinuousSell: false,
+			isHeavyTrading: false,
 		};
 	});
 
 const reset = () => {
 	set(mainConfig);
+};
+
+export const changePriceVol = (evt) => {
+	filterByParams({ [evt.target.name]: evt.target.value ? Number(evt.target.value) : '' });
+};
+
+// 過濾 checkbox 篩選
+export const changeFilterCheck = (evt) => {
+	filterByParams({ [evt.target.name]: evt.target.checked });
+};
+export const changeTab = (key) => (tab) => {
+	filterByParams({ [key]: tab });
+};
+
+export const changeSelect = (key) => (evt) => {
+	filterByParams({ [key]: Number(evt.target.value) });
 };
 
 export default {

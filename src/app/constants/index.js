@@ -19,9 +19,9 @@ export const filterRiseDropTabs = {
 	rise: '漲幅',
 	drop: '跌幅',
 };
-export const filterMaxMinTabs = {
-	max: '新高',
-	min: '新低',
+export const filterHighLowTabs = {
+	high: '新高',
+	low: '新低',
 };
 export const filterLongShortTabs = {
 	long: '多頭排列',
@@ -34,10 +34,6 @@ export const filterMATypeTabs = {
 export const filterBooleanTabs = {
 	top: '站上上軌',
 	bottom: '跌破下軌',
-};
-export const filterVolTabs = {
-	increase: '量增',
-	decrease: '量縮',
 };
 export const filterBuySellTabs = {
 	buy: '轉買',
