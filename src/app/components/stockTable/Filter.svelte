@@ -7,7 +7,7 @@
 
 	.reset,
 	.tag {
-		background-color: var(--theme-progressCircleBar);
+		background-color: var(--theme-progressBar);
 	}
 	.reset:hover {
 		color: #ccc;

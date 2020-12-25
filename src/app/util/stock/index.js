@@ -179,6 +179,10 @@ class StockUtil {
 			priceMA[DAYS.indexOf(5)] < priceMA[DAYS.indexOf(10)] &&
 			priceMA[DAYS.indexOf(10)] < priceMA[DAYS.indexOf(20)] &&
 			priceMA[DAYS.indexOf(20)] < priceMA[DAYS.indexOf(60)];
+		// 判斷六線全上或下
+		const checkPriceMA = priceMA.filter((price, index) => index > 0);
+		const isAllLongOrder = checkPriceMA.every((val, index) => (index === 0 ? true : val < checkPriceMA[index - 1]));
+		const isAllShortOrder = checkPriceMA.every((val, index) => (index === 0 ? true : val > checkPriceMA[index - 1]));
 		// 判斷漲停跌停
 		const limitPrice = calculateLimitPrice(refPrice);
 		const isLimitUp = endPrice === limitPrice.up;
@@ -218,6 +222,8 @@ class StockUtil {
 			isDropTangled,
 			isLongOrder,
 			isShortOrder,
+			isAllLongOrder,
+			isAllShortOrder,
 			isLimitUp,
 			isLimitDown,
 			isLimitUpOnce,
@@ -598,6 +604,52 @@ class StockUtil {
 				isRed: getNDayAgoStock(bar, 1) > 0 && getNDayAgoStock(bar, 2) < 0,
 				isGreen: getNDayAgoStock(bar, 1) < 0 && getNDayAgoStock(bar, 2) > 0,
 			},
+		};
+	}
+	// 取得 kd 資訊
+	static getKDInfo(stockList) {
+		const endPriceList = stockList.map((stock) => stock.endPrice);
+		const maxPriceList = stockList.map((stock) => stock.maxPrice);
+		const minPriceList = stockList.map((stock) => stock.minPrice);
+		const rsvList = [];
+		const kList = [];
+		const dList = [];
+		for (let i = 0; i < stockList.length; i++) {
+			if (i >= 8) {
+				const endPrice = endPriceList[i];
+				const minPrice = Math.min(...minPriceList.slice(i - 8, i + 1));
+				const maxPrice = Math.max(...maxPriceList.slice(i - 8, i + 1));
+				const rsv = ((endPrice - minPrice) / (maxPrice - minPrice)) * 100;
+				rsvList.push(rsv);
+			}
+		}
+		rsvList.forEach((rsv, index) => {
+			if (index === 0) {
+				kList.push(50);
+			} else {
+				kList.push((kList[index - 1] * 2) / 3 + rsv / 3);
+			}
+		});
+		kList.forEach((k, index) => {
+			if (index === 0) {
+				dList.push(50);
+			} else {
+				dList.push((dList[index - 1] * 2) / 3 + k / 3);
+			}
+		});
+		console.log(stockList[0], numRound(getNDayAgoStock(kList, 1), 2));
+		return {
+			k: numRound(getNDayAgoStock(kList, 1), 2),
+			d: numRound(getNDayAgoStock(dList, 1), 2),
+			rsv: numRound(getNDayAgoStock(rsvList, 1), 2),
+			cross: {
+				up: getNDayAgoStock(kList, 1) > getNDayAgoStock(dList, 1) && getNDayAgoStock(kList, 2) < getNDayAgoStock(dList, 2),
+				down: getNDayAgoStock(kList, 1) < getNDayAgoStock(dList, 1) && getNDayAgoStock(kList, 2) > getNDayAgoStock(dList, 2),
+			},
+			isOverbuy: getNDayAgoStock(kList, 1) > 80 && getNDayAgoStock(dList, 1) > 70,
+			isOverSell: getNDayAgoStock(kList, 1) < 20 && getNDayAgoStock(dList, 1) < 30,
+			isHighPassivation: kList.slice(-3).every((k) => k >= 80),
+			isLowPassivation: kList.slice(-3).every((k) => k <= 20),
 		};
 	}
 }

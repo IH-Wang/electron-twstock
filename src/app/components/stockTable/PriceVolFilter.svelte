@@ -1,7 +1,7 @@
 <style>
 	.square {
 		background-color: #fff;
-		border: 1px solid var(--theme-progressCircleBar);
+		border: 1px solid var(--theme-progressBar);
 		border-radius: 6px;
 		cursor: pointer;
 		color: #333;
@@ -10,7 +10,7 @@
 		color: gray;
 	}
 	.active {
-		background-color: var(--theme-progressCircleBar);
+		background-color: var(--theme-progressBar);
 		border: 1px solid #fff;
 		color: #fff;
 	}

@@ -37,12 +37,6 @@
 		count="{$MainStore.totalItems || 0}"
 	/>
 	{#if $MainStore.totalItems > $MainStore.perPage}
-		<Pagination
-			rounded
-			current="{$MainStore.current}"
-			totalItems="{$MainStore.totalItems}"
-			perPage="{$MainStore.perPage}"
-			on:navigate="{changePage}"
-		/>
+		<Pagination rounded current="{$MainStore.current}" totalItems="{$MainStore.totalItems}" perPage="{$MainStore.perPage}" on:navigate="{changePage}" />
 	{/if}
 </div>

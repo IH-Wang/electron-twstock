@@ -12,12 +12,16 @@
 	import * as R from 'ramda';
 	import { fade } from 'svelte/transition';
 	import { format, differenceInDays } from 'date-fns';
-	import { push } from 'svelte-spa-router';
 	// util
-	import { toCurrency } from '../../util/common';
+	import { toCurrency, delay } from '../../util/common';
 	import dbUtil from '../../util/db';
+	import stockUtil from '../../util/stock';
 	// constants
 	import { DB, IPC_INIT_STOCK_INFO, DB_STOCK_INFO } from '../../constants';
+	// component
+	import LineBar from '../common/progressBar/LineBar.svelte';
+	// store
+	import MainStore from '../../stores/main.js';
 	// css
 	import styled from './Table.module.scss';
 
@@ -25,9 +29,14 @@
 	export let count = 0;
 	export let filterProps = { marketType: '', category: -1, isFlagType: false, isReverseType: false };
 	const flagInfoList = ['弱勢', '中等', '強勢'];
+	let totalStock = 0;
 	let db = getContext(DB);
+	let isUpdating = false;
+	let stockList = [];
+	let progress = 0;
 	onMount(async () => {
 		db = await db;
+		totalStock = await dbUtil.getTotalCounts(db, DB_STOCK_INFO);
 	});
 	const getRiseDropColor = (base, compare) => {
 		if (base === compare) {
@@ -51,16 +60,57 @@
 		const today = format(new Date(), 'yyyy/MM/dd');
 		const checkDate = stockInfoList[0].date;
 		const checkDiffDays = differenceInDays(new Date(today), new Date(checkDate));
+
 		// 開啟時間超過當天晚上六點半且 db table 資料日期不是當天的, 就抓取當天的
-		if (checkDiffDays > 1 || (new Date().valueOf() > new Date(`${today} 18:30:00`).valueOf() && checkDiffDays === 1)) {
-			const newStockInfoList = await window.ipcRenderer.invoke(IPC_INIT_STOCK_INFO, { code: 2330, days: 1 }).catch((error) => {
+		isUpdating = true;
+		stockList = $MainStore.baseStockInfoList;
+		await updateStockInfo(0);
+		if (checkDiffDays >= 1 || new Date().valueOf() > new Date(`${today} 18:30:00`).valueOf()) {
+			isUpdating = true;
+			stockList = $MainStore.baseStockInfoList;
+			await updateStockInfo(0);
+		}
+	};
+	const updateStockInfo = async (index) => {
+		if (index < totalStock) {
+			const { code, name, category, marketType } = stockList[index];
+			const stockInfoRes = await window.ipcRenderer.invoke(IPC_INIT_STOCK_INFO, { code, days: 241 }).catch((error) => {
 				console.error(error);
-				window.location.reload();
+				updateStockInfo(index);
 			});
-			if (newStockInfoList[0].date !== checkDate) {
-				await dbUtil.clearStore(db, DB_STOCK_INFO);
-				push('/');
-			}
+			const stockInfo = stockInfoRes.slice(-1)[0];
+			await dbUtil.setItem(db, {
+				store: DB_STOCK_INFO,
+				data: {
+					code,
+					name,
+					category,
+					marketType,
+					date: stockInfo.date,
+					sortPriority: !category ? 99 : 0,
+					priceInfo: stockUtil.getPriceInfo(stockInfo, stockInfoRes),
+					volInfo: stockUtil.getVolInfo(stockInfo, stockInfoRes),
+					flagInfo: stockUtil.getStockFlagType(stockInfo, stockInfoRes),
+					reverseInfo: stockUtil.getStockReverseType(stockInfo, stockInfoRes),
+					buySellInfo: stockUtil.getNetBuySellInfo(stockInfo, stockInfoRes),
+					bsmInfo: stockUtil.getBSMInfo(stockInfo, stockInfoRes),
+					booleanInfo: stockUtil.getBooleanInfo(stockInfoRes),
+					macdInfo: stockUtil.getMACDInfo(stockInfoRes),
+					kdInfo: stockUtil.getKDInfo(stockInfoRes),
+				},
+			});
+			await delay(300);
+			progress = Math.floor(((index + 1) / totalStock) * 1000) / 1000;
+			await updateStockInfo(index + 1);
+		} else {
+			const updatedStockList = await dbUtil.getAllItems(db, DB_STOCK_INFO);
+			MainStore.setBaseStockInfoList(updatedStockList);
+			MainStore.resetFilter();
+			setTimeout(() => {
+				progress = 0;
+				stockList = [];
+				isUpdating = false;
+			}, 2000);
 		}
 	};
 </script>
@@ -73,6 +123,10 @@
 					<span>日期: {stockInfoList[0].date} | 符合筆數: {count} </span>
 					<i class="material-icons mx-1 cursor-pointer hover:text-gray-500" on:click="{() => checkUpdate()}">update</i>
 				</div>
+				{#if isUpdating}
+					<span transition:fade="{{ duration: 200 }}">{progress !== 1 ? '更新股票資訊...' : '更新完成'}</span>
+					<LineBar progressValue="{progress}" />
+				{/if}
 			{/if}
 			<div class="{styled.tableWrapper} shadow overflow-auto w-full border-b border-gray-200 sm:rounded-lg">
 				{#if R.isEmpty(stockInfoList)}
