@@ -1,37 +1,28 @@
 <script>
-	import { fly } from 'svelte/transition';
+	import { fly, crossfade, slide } from 'svelte/transition';
 	import { quintInOut } from 'svelte/easing';
 	// store
 	import MainStore from '../../stores/main';
 	// component
 	import TabPanel from '../common/tab/TabPanel.svelte';
+	import MAContent from './strategy/MA.svelte';
 	// constants
-	import {
-		LONG_SHORT,
-		TOP_BOTTOM,
-		UP_DOWN,
-		filterLongShortTabs,
-		filterMATypeTabs,
-		filterBooleanTabs,
-		DAYS,
-	} from '../../constants';
+	import { strategyTabs, LONG_SHORT, TOP_BOTTOM, UP_DOWN, filterLongShortTabs, filterMATypeTabs, filterBooleanTabs, DAYS } from '../../constants';
 	// style
 	import styled from './Filter.module.scss';
-	export let isReset = false;
+	let activeTab = '';
+
+	const [send, receive] = crossfade({
+		duration: 300,
+		fallback: slide,
+	});
+
 	const selectDays = DAYS.map((day) => `${day} 日線`);
 	const macdOptions = ['趨勢向上', '趨勢向下', '黃金交叉', '死亡交叉'];
-	let activeLongShortTab = $MainStore.isLongOrder
-		? filterLongShortTabs.long
-		: $MainStore.isShortOrder
-		? filterLongShortTabs.short
-		: '';
+	let activeLongShortTab = $MainStore.isLongOrder ? filterLongShortTabs.long : $MainStore.isShortOrder ? filterLongShortTabs.short : '';
 	let activeMAReverseTab = $MainStore.maReverseType;
 	let selectedMAReverseIndex = $MainStore.selectedMAReverseIndex;
-	let activeBooleanTab = $MainStore.isStandOnTop
-		? filterBooleanTabs.top
-		: $MainStore.isBreakBelowBottom
-		? filterBooleanTabs.bottom
-		: '';
+	let activeBooleanTab = $MainStore.isStandOnTop ? filterBooleanTabs.top : $MainStore.isBreakBelowBottom ? filterBooleanTabs.bottom : '';
 	let isFlagType = $MainStore.isFlagType,
 		isReverse = $MainStore.isReverse,
 		isTangledMA = $MainStore.isTangledMA,
@@ -84,29 +75,19 @@
 		selectMACDType = selectMACDType === key ? '' : key;
 		MainStore.filterByParams({ macdType: selectMACDType });
 	};
-	$: {
-		if (isReset) {
-			activeLongShortTab = '';
-			activeMAReverseTab = '';
-			activeBooleanTab = '';
-			selectMACDType = '';
-			selectedMAReverseIndex = 0;
-			isFlagType = false;
-			isReverse = false;
-			isReset = false;
-			isTangledMA = false;
-			isBooleanCompression = false;
-			isBooleanExpand = false;
-		}
-	}
+	// 切換 tab
+	const changeActiveTab = (tab) => {
+		activeTab = activeTab === tab ? '' : tab;
+	};
 </script>
 
-<div
-	class="flex flex-wrap"
-	in:fly="{{ x: -1920, duration: 400, easing: quintInOut, opacity: 1 }}"
-	out:fly="{{ x: 1920, duration: 200, easing: quintInOut }}"
->
-	<TabPanel
+<div class="flex flex-wrap" in:fly="{{ x: -1920, duration: 400, easing: quintInOut, opacity: 1 }}" out:fly="{{ x: 1920, duration: 200, easing: quintInOut }}">
+	{#each strategyTabs as item}
+		<div class="flex-1 m-1 {styled.square} text-center {activeTab === item.value ? styled.active : ''}" on:click="{() => changeActiveTab(item.value)}">
+			{item.text}
+		</div>
+	{/each}
+	<!-- <TabPanel
 		title="排列"
 		tabs="{Object.values(filterLongShortTabs)}"
 		changeTab="{changeTab(LONG_SHORT)}"
@@ -198,5 +179,12 @@
 				</div>
 			{/each}
 		</div>
-	</TabPanel>
+	</TabPanel> -->
 </div>
+{#if activeTab}
+	<div class="flex m-1 py-4 justify-center {styled.activeContent}" in:receive="{{ key: activeTab }}" out:send="{{ key: activeTab }}">
+		{#if activeTab === 'ma'}
+			<MAContent />
+		{/if}
+	</div>
+{/if}

@@ -1,10 +1,10 @@
 <script>
 	// store
-	import MainStore, { changePriceVol, changeFilterCheck, changeTab } from '../../stores/main';
+	import MainStore, { changePriceVol, changeFilterCheck, changeTab } from '../../../stores/main';
 	// component
-	import TabPanel from '../common/tab/TabPanel.svelte';
+	import TabPanel from '../../common/tab/TabPanel.svelte';
 	// constants
-	import { filterRiseDropTabs, DAYS } from '../../constants';
+	import { filterRiseDropTabs, DAYS } from '../../../constants';
 	// 過濾 checkbox 篩選
 	const changeDaysFilterCheck = (day) => () => {
 		let checkDays = $MainStore.checkedRiseDropMarginDays;

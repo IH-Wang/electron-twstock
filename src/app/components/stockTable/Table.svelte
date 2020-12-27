@@ -57,6 +57,9 @@
 		}
 	};
 	const checkUpdate = async () => {
+		if (isUpdating) {
+			return;
+		}
 		const today = format(new Date(), 'yyyy/MM/dd');
 		const checkDate = stockInfoList[0].date;
 		const checkDiffDays = differenceInDays(new Date(today), new Date(checkDate));
@@ -107,9 +110,9 @@
 			MainStore.setBaseStockInfoList(updatedStockList);
 			MainStore.resetFilter();
 			setTimeout(() => {
+				isUpdating = false;
 				progress = 0;
 				stockList = [];
-				isUpdating = false;
 			}, 2000);
 		}
 	};
@@ -121,7 +124,10 @@
 			{#if !R.isEmpty(stockInfoList)}
 				<div class="inline-flex my-1">
 					<span>日期: {stockInfoList[0].date} | 符合筆數: {count} </span>
-					<i class="material-icons mx-1 cursor-pointer hover:text-gray-500" on:click="{() => checkUpdate()}">update</i>
+					<i
+						class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
+						on:click="{() => checkUpdate()}"
+					>update</i>
 				</div>
 				{#if isUpdating}
 					<span transition:fade="{{ duration: 200 }}">{progress !== 1 ? '更新股票資訊...' : '更新完成'}</span>

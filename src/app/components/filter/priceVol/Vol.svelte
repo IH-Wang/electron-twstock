@@ -1,10 +1,10 @@
 <script>
 	// store
-	import MainStore, { changePriceVol, changeTab, changeSelect, changeFilterCheck } from '../../stores/main';
+	import MainStore, { changePriceVol, changeTab, changeSelect, changeFilterCheck } from '../../../stores/main';
 	// component
-	import TabPanel from '../common/tab/TabPanel.svelte';
+	import TabPanel from '../../common/tab/TabPanel.svelte';
 	// constants
-	import { filterHighLowTabs, DAYS } from '../../constants';
+	import { filterHighLowTabs, DAYS } from '../../../constants';
 	const selectedDays = [{ text: '當日', value: 0 }, ...DAYS.map((day) => ({ text: `${day}日均量`, value: day }))];
 	// 過濾 checkbox 篩選
 	const changeDaysFilterCheck = (day) => () => {
@@ -18,7 +18,7 @@
 	};
 </script>
 
-<div class="flex flex-col justify-center items-center gap-y-2 w-4/5">
+<div class="flex flex-col justify-center items-center gap-y-2">
 	<div class="flex w-full justify-center gap-x-1 px-1">
 		<div class="flex flex-1 items-center text-center">
 			<span class="text-sm rounded-l w-16">起</span>

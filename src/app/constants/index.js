@@ -15,6 +15,18 @@ export const SITES = 'SITES';
 export const DEALER = 'DEALER';
 export const MAJOR = 'MAJOR';
 export const DAYS = [3, 5, 10, 20, 60, 120, 240];
+export const priceVolTabs = [
+	{ text: '價格', value: 'price' },
+	{ text: '成交量', value: 'vol' },
+	{ text: '漲跌', value: 'riseDrop' },
+	{ text: '價量關係', value: 'priceVol' },
+];
+export const strategyTabs = [
+	{ text: '均線', value: 'ma' },
+	{ text: '布林', value: 'boolean' },
+	{ text: 'MACD', value: 'macd' },
+	{ text: 'KD', value: 'kd' },
+];
 export const filterRiseDropTabs = {
 	rise: '漲幅',
 	drop: '跌幅',
@@ -26,6 +38,10 @@ export const filterHighLowTabs = {
 export const filterLongShortTabs = {
 	long: '多頭排列',
 	short: '空頭排列',
+};
+export const filterMABackTestTabs = {
+	backTest: '回測',
+	fallBelow: '跌破',
 };
 export const filterMATypeTabs = {
 	up: '上彎',

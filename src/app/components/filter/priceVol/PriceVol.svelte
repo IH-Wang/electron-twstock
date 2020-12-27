@@ -1,8 +1,8 @@
 <script>
 	// store
-	import MainStore, { changeTab } from '../../stores/main';
+	import MainStore, { changeTab } from '../../../stores/main';
 	// component
-	import TabPanel from '../common/tab/TabPanel.svelte';
+	import TabPanel from '../../common/tab/TabPanel.svelte';
 	const priceVolOptions = ['價量齊揚', '價漲量縮', '價跌量增', '價跌量縮'];
 </script>
 

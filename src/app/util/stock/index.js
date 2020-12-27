@@ -1,8 +1,8 @@
 import * as ramda from 'ramda';
 import { numRound } from '../math';
 import { DAYS } from '../../constants';
-const movingAverage = (data, days) => {
-	const movingList = data.slice(days * -1);
+const movingAverage = (data, days, isPrevious) => {
+	const movingList = !isPrevious ? data.slice(days * -1) : data.slice((days + 1) * -1, -1);
 	return numRound(ramda.mean(movingList), 2);
 };
 
@@ -203,6 +203,19 @@ class StockUtil {
 				endPrice < getNDayAgoStock(endPriceList, day) &&
 				refPrice > getNDayAgoStock(endPriceList, day + 1),
 		);
+		// 判斷回測均線
+		const maBackTest = DAYS.map((day) => {
+			const prePriceMA = movingAverage(endPriceList, day, true);
+			return (
+				(minPrice < prePriceMA && endPrice > prePriceMA) ||
+				(minPrice > prePriceMA && numRound((minPrice - prePriceMA) / prePriceMA, 3) < 0.02)
+			);
+		});
+		// 判斷跌破均線
+		const maFallBelow = DAYS.map((day) => {
+			const prePriceMA = movingAverage(endPriceList, day, true);
+			return endPrice < prePriceMA;
+		});
 
 		return {
 			refPrice,
@@ -231,6 +244,10 @@ class StockUtil {
 			maReverse: {
 				up: maReverseUp,
 				down: maReverseDown,
+			},
+			maBackTest: {
+				backTest: maBackTest,
+				fallBelow: maFallBelow,
 			},
 			riseDropDays: {
 				price: DAYS.map((day) => numRound(endPrice - getNDayAgoStock(endPriceList, day), 2)),
@@ -637,7 +654,6 @@ class StockUtil {
 				dList.push((dList[index - 1] * 2) / 3 + k / 3);
 			}
 		});
-		console.log(stockList[0], numRound(getNDayAgoStock(kList, 1), 2));
 		return {
 			k: numRound(getNDayAgoStock(kList, 1), 2),
 			d: numRound(getNDayAgoStock(dList, 1), 2),

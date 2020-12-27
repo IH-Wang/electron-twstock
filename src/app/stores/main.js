@@ -1,7 +1,15 @@
 import { writable } from 'svelte/store';
 import * as R from 'ramda';
 // constants
-import { filterRiseDropTabs, filterHighLowTabs, filterMATypeTabs, filterBuySellTabs, DAYS } from '../constants';
+import {
+	filterRiseDropTabs,
+	filterHighLowTabs,
+	filterMABackTestTabs,
+	filterMATypeTabs,
+	filterBuySellTabs,
+	DAYS,
+	filterLongShortTabs,
+} from '../constants';
 
 const mainConfig = {
 	marketTypeList: [],
@@ -12,6 +20,8 @@ const mainConfig = {
 	checkedPriceHighLowDays: [],
 	checkedVolHighLowDays: [],
 	checkedRiseDropMarginDays: [],
+	checkedMABackTestDays: [],
+	checkedMAReverseDays: [],
 	searchText: '',
 	refPrice: null,
 	startPrice: null,
@@ -32,6 +42,8 @@ const mainConfig = {
 	priceHighLowType: '',
 	volHighLowType: '',
 	priceVolType: '',
+	maLongShortType: '',
+	maBackTestType: '',
 	maReverseType: '',
 	selectedMAReverseIndex: 0,
 	macdType: '',
@@ -46,8 +58,8 @@ const mainConfig = {
 	isTangledMA: false,
 	isFlagType: false,
 	isReverse: false,
-	isLongOrder: false,
-	isShortOrder: false,
+	isAllOrder: false,
+
 	isBreakTangled: false,
 	isDropTangled: false,
 	isStandOnTop: false,
@@ -219,6 +231,7 @@ const filterByPriceVol = (props, data) => {
 				: checkedVolHighLowDays.some((day) => stock.volInfo.vol === stock.volInfo.minVolDays[DAYS.indexOf(day)]),
 		);
 	}
+	// 爆大量
 	if (isHeavyTrading) {
 		newData = newData.filter((stock) => stock.volInfo.vol > stock.volInfo.volDays[DAYS.indexOf(5)] * 3);
 	}
@@ -267,16 +280,24 @@ const filterByPriceVol = (props, data) => {
 	if (priceVolType) {
 		switch (priceVolType) {
 			case '價量齊揚':
-				newData = newData.filter((stock) => stock.priceInfo.riseDropMargin >= 5 && stock.volInfo.vol > stock.volInfo.volDays[DAYS.indexOf(20)]);
+				newData = newData.filter(
+					(stock) => stock.priceInfo.riseDropMargin >= 5 && stock.volInfo.vol > stock.volInfo.volDays[DAYS.indexOf(20)],
+				);
 				break;
 			case '價漲量縮':
-				newData = newData.filter((stock) => stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] >= 10 && stock.volInfo.vol < stock.volInfo.preVol);
+				newData = newData.filter(
+					(stock) => stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] >= 10 && stock.volInfo.vol < stock.volInfo.preVol,
+				);
 				break;
 			case '價跌量增':
-				newData = newData.filter((stock) => stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] <= -10 && stock.volInfo.vol > stock.volInfo.preVol);
+				newData = newData.filter(
+					(stock) => stock.priceInfo.riseDropDays.margin[DAYS.indexOf(5)] <= -10 && stock.volInfo.vol > stock.volInfo.preVol,
+				);
 				break;
 			case '價跌量縮':
-				newData = newData.filter((stock) => stock.priceInfo.riseDropMargin <= -5 && stock.volInfo.vol < stock.volInfo.volDays[DAYS.indexOf(20)]);
+				newData = newData.filter(
+					(stock) => stock.priceInfo.riseDropMargin <= -5 && stock.volInfo.vol < stock.volInfo.volDays[DAYS.indexOf(20)],
+				);
 				break;
 			default:
 				break;
@@ -288,26 +309,26 @@ const filterByPriceVol = (props, data) => {
 const filterByStrategy = (props, data) => {
 	const {
 		maReverseType,
-		isLongOrder,
-		isShortOrder,
 		isTangledMA,
 		isFlagType,
 		isReverse,
 		macdType,
+		maLongShortType,
+		maBackTestType,
+		checkedMABackTestDays,
+		checkedMAReverseDays,
 		// isBreakTangled,
 		// isDropTangled,
 		isStandOnTop,
 		isBreakBelowBottom,
 		isBooleanCompression,
 		isBooleanExpand,
-		selectedMAReverseIndex,
 	} = props;
 	let newData = data;
-	if (isLongOrder) {
-		newData = newData.filter((stock) => !!stock.priceInfo.isLongOrder);
-	}
-	if (isShortOrder) {
-		newData = newData.filter((stock) => !!stock.priceInfo.isShortOrder);
+	if (maLongShortType) {
+		newData = newData.filter((stock) =>
+			maLongShortType === filterLongShortTabs.long ? !!stock.priceInfo.isLongOrder : !!stock.priceInfo.isShortOrder,
+		);
 	}
 	if (isTangledMA) {
 		newData = newData.filter((stock) => !!stock.priceInfo.isTangledMA);
@@ -318,23 +339,32 @@ const filterByStrategy = (props, data) => {
 	if (isReverse) {
 		newData = newData.filter((stock) => stock.reverseInfo.isReverse === isReverse);
 	}
-	if (maReverseType) {
-		if (maReverseType === filterMATypeTabs.up) {
-			newData = newData.filter((stock) => !!stock.priceInfo.maReverse.up[selectedMAReverseIndex]);
-		} else {
-			newData = newData.filter((stock) => !!stock.priceInfo.maReverse.down[selectedMAReverseIndex]);
-		}
+	if (maBackTestType && !R.isEmpty(checkedMABackTestDays)) {
+		newData = newData.filter((stock) =>
+			maBackTestType === filterMABackTestTabs.backTest
+				? checkedMABackTestDays.some((day) => !!stock.priceInfo.maBackTest.backTest[DAYS.indexOf(day)])
+				: checkedMABackTestDays.some((day) => !!stock.priceInfo.maBackTest.fallBelow[DAYS.indexOf(day)]),
+		);
+	}
+	if (maReverseType && !R.isEmpty(checkedMAReverseDays)) {
+		newData = newData.filter((stock) =>
+			maReverseType === filterMATypeTabs.up
+				? checkedMAReverseDays.some((day) => !!stock.priceInfo.maReverse.up[DAYS.indexOf(day)])
+				: checkedMAReverseDays.some((day) => !!stock.priceInfo.maReverse.down[DAYS.indexOf(day)]),
+		);
 	}
 	if (macdType) {
 		switch (macdType) {
 			case '趨勢向上':
 				newData = newData.filter(
-					(stock) => !!stock.macdInfo.isIncreaseTrend && stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
+					(stock) =>
+						!!stock.macdInfo.isIncreaseTrend && stock.priceInfo.priceMA[DAYS.indexOf(5)] > stock.priceInfo.priceMA[DAYS.indexOf(20)],
 				);
 				break;
 			case '趨勢向下':
 				newData = newData.filter(
-					(stock) => !!stock.macdInfo.isDeceaseTrend && stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
+					(stock) =>
+						!!stock.macdInfo.isDeceaseTrend && stock.priceInfo.priceMA[DAYS.indexOf(5)] < stock.priceInfo.priceMA[DAYS.indexOf(20)],
 				);
 				break;
 			case '黃金交叉':
@@ -366,7 +396,8 @@ const filterByStrategy = (props, data) => {
 	}
 	if (isBooleanExpand) {
 		newData = newData.filter(
-			(stock) => stock.booleanInfo.compressionRatio[0] > stock.booleanInfo.compressionRatio[1] + 2.5 && stock.booleanInfo.compressionRatio[1] < 10,
+			(stock) =>
+				stock.booleanInfo.compressionRatio[0] > stock.booleanInfo.compressionRatio[1] + 2.5 && stock.booleanInfo.compressionRatio[1] < 10,
 		);
 	}
 	return newData;
@@ -494,8 +525,7 @@ const getFilterTag = (props) => {
 		toVol,
 		isHeavyTrading,
 		maReverseType,
-		isLongOrder,
-		isShortOrder,
+		maLongShortType,
 		isTangledMA,
 		isFlagType,
 		isReverse,
@@ -536,7 +566,11 @@ const getFilterTag = (props) => {
 		tags.push(`收盤價近 ${checkedPriceHighLowDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${priceHighLowType}`);
 	}
 	if (fromVol || toVol) {
-		tags.push(`${selectedVol === 0 ? '成交量' : `${selectedVol}日均量`} ${!toVol ? '>' : ''} ${fromVol > 0 ? fromVol : 0}${toVol > 0 ? `~${toVol}` : ''}`);
+		tags.push(
+			`${selectedVol === 0 ? '成交量' : `${selectedVol}日均量`} ${!toVol ? '>' : ''} ${fromVol > 0 ? fromVol : 0}${
+				toVol > 0 ? `~${toVol}` : ''
+			}`,
+		);
 	}
 	if (volHighLowType && !R.isEmpty(checkedVolHighLowDays)) {
 		tags.push(`成交量近 ${checkedVolHighLowDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${volHighLowType}`);
@@ -550,12 +584,10 @@ const getFilterTag = (props) => {
 	if (maReverseType) {
 		tags.push(`${DAYS[selectedMAReverseIndex]}日均線${maReverseType}`);
 	}
-	if (isLongOrder) {
-		tags.push('多頭排列');
+	if (maLongShortType) {
+		tags.push(maLongShortType);
 	}
-	if (isShortOrder) {
-		tags.push('空頭排列');
-	}
+
 	if (isTangledMA) {
 		tags.push('均線糾結');
 	}
@@ -644,6 +676,8 @@ const resetFilter = () =>
 			priceHighLowType: '',
 			volHighLowType: '',
 			priceVolType: '',
+			maLongShortType: '',
+			maBackTestType: '',
 			maReverseType: '',
 			selectedMAReverseIndex: 0,
 			macdType: '',
@@ -655,13 +689,13 @@ const resetFilter = () =>
 			checkedPriceHighLowDays: [],
 			checkedVolHighLowDays: [],
 			checkedRiseDropMarginDays: [],
+			checkedMABackTestDays: [],
+			checkedMAReverseDays: [],
 			isLimitUp: false,
 			isLimitDown: false,
 			isTangledMA: false,
 			isFlagType: false,
 			isReverse: false,
-			isLongOrder: false,
-			isShortOrder: false,
 			isBreakTangled: false,
 			isDropTangled: false,
 			isStandOnTop: false,
@@ -677,6 +711,7 @@ const resetFilter = () =>
 			isMajorContinuousBuy: false,
 			isMajorContinuousSell: false,
 			isHeavyTrading: false,
+			isAllOrder: false,
 		};
 	});
 

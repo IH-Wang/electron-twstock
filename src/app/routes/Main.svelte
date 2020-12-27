@@ -3,7 +3,7 @@
 	// import * as R from 'ramda';
 	import { onMount, onDestroy, getContext } from 'svelte';
 	// component
-	import Filter from '../components/stockTable/Filter.svelte';
+	import Filter from '../components/filter/Filter.svelte';
 	import Table from '../components/stockTable/Table.svelte';
 	import Pagination from '../components/common/pagination/Pagination.svelte';
 	// store

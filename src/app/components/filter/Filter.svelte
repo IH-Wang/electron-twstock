@@ -20,7 +20,7 @@
 	import MainStore from '../../stores/main';
 	// component
 	import Tab from '../common/tab/Tab.svelte';
-	import PriceVolFilter from './PriceVolFilter.svelte';
+	import PriceVolFilter from '../filter/PriceVolFilter.svelte';
 	import StrategyFilter from './StrategyFilter.svelte';
 	import BigThreeFilter from './BigThreeFilter.svelte';
 	const filterTabOption = {

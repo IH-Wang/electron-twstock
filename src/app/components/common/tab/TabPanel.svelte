@@ -20,10 +20,11 @@
 		{#each tabs as tab}
 			<li class="p-0 flex-1">
 				<a
-					class="{tab === activeTab ? styled.active : ''} inline-block w-full px-0 text-sm text-center hover:text-gray-500"
+					class="{tab === activeTab ? styled.active : ''} inline-block w-full text-sm text-center hover:text-gray-500"
 					href="{null}"
 					on:click="{() => setTab(tab)}"
 				>{tab}</a>
+				<slot />
 			</li>
 		{/each}
 	</ul>
