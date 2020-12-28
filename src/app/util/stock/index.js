@@ -474,7 +474,6 @@ class StockUtil {
 				volRatio: numRound((majorNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(majorList),
 				total: DAYS.map((day) => ramda.sum(majorList.slice(-day))),
-				daysChange: [],
 				turnPoint: getTurningPoint(majorList),
 				placementStrategy: null,
 			},
@@ -484,7 +483,6 @@ class StockUtil {
 				volRatio: numRound((foreignNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(foreignList),
 				total: DAYS.map((day) => ramda.sum(foreignList.slice(-day))),
-				daysChange: DAYS.map((day) => foreignHolding - getNDayAgoStock(foreignList, day)),
 				turnPoint: getTurningPoint(foreignList),
 				placementStrategy: {
 					enter: stockInfo4DaysAgo.foreignHolding === 0 && foreignHolding !== 0,
@@ -497,7 +495,6 @@ class StockUtil {
 				volRatio: numRound((sitesNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(sitesList),
 				total: DAYS.map((day) => ramda.sum(sitesList.slice(-day))),
-				daysChange: DAYS.map((day) => sitesHolding - getNDayAgoStock(sitesList, day)),
 				turnPoint: getTurningPoint(sitesList),
 				placementStrategy: {
 					enter: stockInfo4DaysAgo.sitesHolding === 0 && sitesHolding !== 0,
@@ -510,7 +507,6 @@ class StockUtil {
 				volRatio: numRound((dealerNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(dealerList),
 				total: DAYS.map((day) => ramda.sum(dealerList.slice(-day))),
-				daysChange: DAYS.map((day) => dealerHolding - getNDayAgoStock(dealerList, day)),
 				turnPoint: getTurningPoint(dealerList),
 				placementStrategy: {
 					enter: stockInfo4DaysAgo.dealerHolding === 0 && dealerHolding !== 0,
@@ -523,7 +519,6 @@ class StockUtil {
 				volRatio: numRound((bigThreeNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(bigThreeList),
 				total: DAYS.map((day) => ramda.sum(bigThreeList.slice(-day))),
-				daysChange: DAYS.map((day) => bigThreeHolding - getNDayAgoStock(bigThreeList, day)),
 				turnPoint: getTurningPoint(bigThreeList),
 				placementStrategy: null,
 			},

@@ -15,18 +15,18 @@
 </style>
 
 <script>
-	// import { crossfade, slide } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	// store
 	import MainStore from '../../stores/main';
 	// component
 	import Tab from '../common/tab/Tab.svelte';
 	import PriceVolFilter from '../filter/PriceVolFilter.svelte';
 	import StrategyFilter from './StrategyFilter.svelte';
-	import BigThreeFilter from './BigThreeFilter.svelte';
+	import BargainChipFilter from './BargainChipFilter.svelte';
 	const filterTabOption = {
 		priceVol: '價量篩選',
 		strategy: '技術篩選',
-		big3: '三大法人',
+		bargainChip: '籌碼篩選',
 	};
 
 	let selectMarketType = '';
@@ -77,7 +77,12 @@
 		</div>
 		<div class="mx-2">
 			<span>市場</span>
-			<select name="marketType" bind:value="{selectMarketType}" class="inline-flex px-4 bg-white rounded-md h-full" on:blur="{changeMarketType}">
+			<select
+				name="marketType"
+				bind:value="{selectMarketType}"
+				class="inline-flex px-4 bg-white rounded-md h-full"
+				on:blur="{changeMarketType}"
+			>
 				<option value="">全部</option>
 				{#each $MainStore.marketTypeList as market}
 					<option value="{market}">{market}</option>
@@ -104,19 +109,18 @@
 	<div class="mt-2">
 		<Tab tabs="{tabs}" bind:activeTab changeTab="{changeTab}" />
 	</div>
-
 	<div class="mt-2 flex flex-col w-full">
 		{#if activeTab === filterTabOption.priceVol}
-			<PriceVolFilter bind:isReset />
+			<PriceVolFilter />
 		{:else if activeTab === filterTabOption.strategy}
-			<StrategyFilter bind:isReset />
-		{:else if activeTab === filterTabOption.big3}
-			<BigThreeFilter bind:isReset />
+			<StrategyFilter />
+		{:else if activeTab === filterTabOption.bargainChip}
+			<BargainChipFilter bind:isReset />
 		{/if}
 	</div>
 	<div class="mt-2 flex flex-wrap">
 		{#each $MainStore.tags as tag}
-			<div class="border tag text-white mx-1 px-1">{tag}</div>
+			<div class="border tag text-white mx-1 px-1" transition:fly>{tag}</div>
 		{/each}
 	</div>
 </div>

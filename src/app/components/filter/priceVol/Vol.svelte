@@ -78,6 +78,7 @@
 					class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
 					on:change="{changeDaysFilterCheck(day)}"
 					checked="{$MainStore.checkedVolHighLowDays.includes(day)}"
+					disabled="{!$MainStore.volHighLowType}"
 				/><span>{day} 日</span>
 			</div>
 		{/each}
