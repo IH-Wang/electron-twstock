@@ -15,7 +15,7 @@
 	import styled from './Filter.module.scss';
 
 	const [send, receive] = crossfade({
-		duration: 300,
+		duration: 200,
 		fallback: slide,
 	});
 

@@ -732,7 +732,7 @@ const getFilterTag = (props) => {
 		tags.push(`成交量近 ${checkedVolHighLowDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日${volHighLowType}`);
 	}
 	if (isHeavyTrading) {
-		tags.push(`爆大量 - 成交量 > 5 日均量三倍`);
+		tags.push(`爆大量：成交量 > 5 日均量三倍`);
 	}
 	if (riseDropMarginType && (fromRiseDropMargin || toRiseDropMargin)) {
 		const riseDropMarginText = `${!toRiseDropMargin ? '>' : ''} ${fromRiseDropMargin > 0 ? fromRiseDropMargin : 0}${
@@ -757,16 +757,16 @@ const getFilterTag = (props) => {
 	if (priceVolType) {
 		switch (priceVolType) {
 			case PRICE_UP_VOL_UP:
-				tags.push(`${PRICE_UP_VOL_UP} - 今日漲幅 > 5% 且成交量大於 20 日均量`);
+				tags.push(`${PRICE_UP_VOL_UP}：今日漲幅 > 5% 且成交量大於 20 日均量`);
 				break;
 			case PRICE_UP_VOL_DOWN:
-				tags.push(`${PRICE_UP_VOL_DOWN} - 5 日漲幅 > 10% 且成交量小於昨日成交量`);
+				tags.push(`${PRICE_UP_VOL_DOWN}：5 日漲幅 > 10% 且成交量小於昨日成交量`);
 				break;
 			case PRICE_DOWN_VOL_UP:
-				tags.push(`${PRICE_DOWN_VOL_UP} - 5 日跌幅 > 10% 且成交量大於昨日成交量`);
+				tags.push(`${PRICE_DOWN_VOL_UP}：5 日跌幅 > 10% 且成交量大於昨日成交量`);
 				break;
 			case PRICE_DOWN_VOL_DOWN:
-				tags.push(`${PRICE_DOWN_VOL_DOWN} - 今日跌幅 < 5% 且成交量小於 20 日均量`);
+				tags.push(`${PRICE_DOWN_VOL_DOWN}：今日跌幅 < 5% 且成交量小於 20 日均量`);
 				break;
 		}
 	}
@@ -777,7 +777,7 @@ const getFilterTag = (props) => {
 		}
 	}
 	if (isTangledMA) {
-		tags.push('均線糾結 - 收盤價與 5|10|20 日均線上下震幅在 -2% ~ 3%');
+		tags.push('均線糾結：收盤價與 5|10|20 日均線上下震幅在 -2% ~ 3%');
 	}
 	if (isFlagType) {
 		tags.push('旗型');
@@ -804,7 +804,7 @@ const getFilterTag = (props) => {
 				tags.push(`MACD 快慢線黃金交叉且 5MA > 20MA`);
 				break;
 			case '死亡交叉':
-				tags.push(`MACD快慢線死亡交叉且 5MA < 20MA`);
+				tags.push(`MACD 快慢線死亡交叉且 5MA < 20MA`);
 				break;
 		}
 	}
@@ -818,7 +818,7 @@ const getFilterTag = (props) => {
 		tags.push('今日布林壓縮率 > 昨日布林壓縮率 2.5% 且布林壓縮率 > 10%');
 	}
 	if (kdType) {
-		tags.push(`KD ${kdType}且${kdType === filterKDTabs.up ? '5MA > 10MA' : '5MA < 10MA'}`);
+		tags.push(`KD ${kdType}且 ${kdType === filterKDTabs.up ? '5MA > 10MA' : '5MA < 10MA'}`);
 	}
 	if (isOverbuy) {
 		tags.push(`KD 超買`);

@@ -23,7 +23,7 @@ function createWindow() {
 			if (process.platform === 'darwin') {
 				const template = [];
 				template.unshift({
-					label: app.getName(),
+					label: '股溝',
 					submenu: [
 						{
 							label: '結束',

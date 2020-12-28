@@ -12,7 +12,7 @@
 	import styled from './Filter.module.scss';
 	let activeTab = '';
 	const [send, receive] = crossfade({
-		duration: 300,
+		duration: 200,
 		fallback: slide,
 	});
 	// 切換 tab
