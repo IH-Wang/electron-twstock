@@ -52,6 +52,9 @@
 		MainStore.changeCategory(selectCategory);
 	};
 	const resetFilter = () => {
+		selectMarketType = '';
+		selectCategory = -1;
+		searchText = '';
 		MainStore.resetFilter();
 		activeTab = tabs[0];
 		isReset = true;

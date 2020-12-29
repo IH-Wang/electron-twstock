@@ -6,7 +6,7 @@ module.exports = {
 	},
 	packagerConfig: {
 		icon: 'public/image/icon/stock.icns',
-		executableName: '股溝_alpha0.1.1',
+		executableName: 'electron-twstock',
 		appVersion: '0.1.1',
 	},
 	electronRebuildConfig: {},

@@ -26,7 +26,7 @@
     "stock",
     "demo"
   ],
-  "author": "IH-Wang",
+  "author": "YH-Wang",
   "license": "MIT",
   "config": {
     "forge": "./forge.config.js"

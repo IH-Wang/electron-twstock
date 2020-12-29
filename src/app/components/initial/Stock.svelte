@@ -72,6 +72,7 @@
 							bsmInfo: stockUtil.getBSMInfo(stockInfo, stockInfoRes),
 							booleanInfo: stockUtil.getBooleanInfo(stockInfoRes),
 							macdInfo: stockUtil.getMACDInfo(stockInfoRes),
+							kdInfo: stockUtil.getKDInfo(stockInfoRes),
 						},
 					});
 				} else {
@@ -113,6 +114,6 @@
 		{:else}
 			<p>全部資料建置完成</p>
 		{/if}
-		<p class="{styled.memo}">(各股抓取240天資料做建置, 不滿240天暫不建檔)</p>
+		<p class="{styled.memo}">(各股抓取 240 天資料做建置, 不滿 240 天暫不建檔)</p>
 	</div>
 </div>
