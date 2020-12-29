@@ -28,7 +28,7 @@
 				type="number"
 				placeholder="昨日價"
 				value="{$MainStore.refPrice}"
-				on:input="{changePriceVol}"
+				on:keyup="{changePriceVol}"
 			/>
 		</div>
 		<div class="flex flex-1 items-center text-center">
@@ -39,7 +39,7 @@
 				type="number"
 				placeholder="開盤價"
 				value="{$MainStore.startPrice}"
-				on:input="{changePriceVol}"
+				on:keyup="{changePriceVol}"
 			/>
 		</div>
 		<div class="flex flex-1 items-center text-center">
@@ -50,7 +50,7 @@
 				type="number"
 				placeholder="最高價"
 				value="{$MainStore.maxPrice}"
-				on:input="{changePriceVol}"
+				on:keyup="{changePriceVol}"
 			/>
 		</div>
 		<div class="flex flex-1 items-center text-center">
@@ -61,7 +61,7 @@
 				type="number"
 				placeholder="最低價"
 				value="{$MainStore.minPrice}"
-				on:input="{changePriceVol}"
+				on:keyup="{changePriceVol}"
 			/>
 		</div>
 		<div class="flex flex-1 items-center text-center">
@@ -72,7 +72,7 @@
 				type="number"
 				placeholder="收盤價"
 				value="{$MainStore.endPrice}"
-				on:input="{changePriceVol}"
+				on:keyup="{changePriceVol}"
 			/>
 		</div>
 	</div>

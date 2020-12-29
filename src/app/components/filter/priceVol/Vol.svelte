@@ -28,7 +28,7 @@
 				type="number"
 				placeholder="成交量"
 				value="{$MainStore.fromVol}"
-				on:input="{changePriceVol}"
+				on:keyup="{changePriceVol}"
 			/>
 		</div>
 		<div class="flex flex-1 items-center text-center">
@@ -39,7 +39,7 @@
 				type="number"
 				placeholder="成交量"
 				value="{$MainStore.toVol}"
-				on:input="{changePriceVol}"
+				on:keyup="{changePriceVol}"
 			/>
 		</div>
 		<div class="flex flex-1 items-center text-center justify-center">

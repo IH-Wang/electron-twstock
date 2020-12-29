@@ -847,7 +847,7 @@ const getFilterTag = (props) => {
 				R.isEmpty(checkedSitesBuySellDays)
 					? ''
 					: `近 ${checkedSitesBuySellDays.map((day, index) => (index === 0 ? day : `${day}`)).join(' | ')} 日`
-			}投信${foreignType}`,
+			}投信${sitesType}`,
 		);
 	}
 	if (dealerType) {

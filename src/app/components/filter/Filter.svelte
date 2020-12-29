@@ -75,7 +75,7 @@
 				bind:value="{searchText}"
 				placeholder="股號 | 股名"
 				class="focus:ring-indigo-500 rounded-md pl-1 w-36"
-				on:input="{changeText}"
+				on:keyup="{changeText}"
 			/>
 		</div>
 		<div class="mx-2">
