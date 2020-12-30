@@ -12,6 +12,7 @@
 	import * as R from 'ramda';
 	import { fade } from 'svelte/transition';
 	import { format, differenceInDays } from 'date-fns';
+	const xlsx = require('xlsx');
 	// util
 	import { toCurrency, delay } from '../../util/common';
 	import dbUtil from '../../util/db';
@@ -116,29 +117,38 @@
 			}, 2000);
 		}
 	};
+
+	const downloadToXlsx = async () => {
+		var stockTable = document.getElementById('stockTable');
+		const sheet = xlsx.utils.table_to_sheet(stockTable);
+		console.log(sheet);
+		// xlsx.writeFile(wb, `${format(new Date(), 'yyyy/MM/dd')}.xlsx`);
+	};
 </script>
 
 <div class="w-full">
 	<div class="flex flex-col my-2">
 		<div class="align-middle inline-block w-full px-4">
-			{#if !R.isEmpty(stockInfoList)}
-				<div class="inline-flex my-1">
-					<span>日期: {stockInfoList[0].date} | 符合筆數: {count} </span>
-					<i
-						class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
-						on:click="{() => checkUpdate()}"
-					>update</i>
-				</div>
-				{#if isUpdating}
-					<span transition:fade="{{ duration: 200 }}">{progress !== 1 ? '更新股票資訊...' : '更新完成'}</span>
-					<LineBar progressValue="{progress}" />
-				{/if}
+			<div class="inline-flex my-1">
+				<span>日期: {!R.isEmpty(stockInfoList) ? stockInfoList[0].date : format(new Date(), 'yyyy/MM/dd')} | 符合筆數: {count} </span>
+				<i
+					class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
+					on:click="{() => checkUpdate()}"
+				>update</i>
+				<i
+					class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
+					on:click="{() => downloadToXlsx()}"
+				>download</i>
+			</div>
+			{#if isUpdating}
+				<span transition:fade="{{ duration: 200 }}">{progress !== 1 ? '更新股票資訊...' : '更新完成'}</span>
+				<LineBar progressValue="{progress}" />
 			{/if}
 			<div class="{styled.tableWrapper} shadow overflow-auto w-full border-b border-gray-200 sm:rounded-lg">
 				{#if R.isEmpty(stockInfoList)}
 					<span>查無資料</span>
 				{:else}
-					<table class="{styled.table} min-w-full divide-y divide-gray-200">
+					<table class="{styled.table} min-w-full divide-y divide-gray-200" id="stockTable">
 						<thead>
 							<tr class="{styled.tableHeader}">
 								<th scope="col" class="text-center uppercase tracking-wider">股號</th>
