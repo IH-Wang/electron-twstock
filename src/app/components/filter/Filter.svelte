@@ -1,22 +1,32 @@
 <style>
-	input:focus {
+	input:focus,
+	select:focus {
 		outline: none;
 		box-shadow: 0 0 0 2px var(--theme-inputFocusBorder);
+	}
+
+	.reset,
+	.tag {
+		background-color: var(--theme-progressBar);
+	}
+	.reset:hover {
+		color: #ccc;
 	}
 </style>
 
 <script>
+	import { fly } from 'svelte/transition';
 	// store
 	import MainStore from '../../stores/main';
 	// component
 	import Tab from '../common/tab/Tab.svelte';
-	import PriceVolFilter from './PriceVolFilter.svelte';
+	import PriceVolFilter from '../filter/PriceVolFilter.svelte';
 	import StrategyFilter from './StrategyFilter.svelte';
-	import BigThreeFilter from './BigThreeFilter.svelte';
+	import BargainChipFilter from './BargainChipFilter.svelte';
 	const filterTabOption = {
 		priceVol: '價量篩選',
 		strategy: '技術篩選',
-		big3: '三大法人',
+		bargainChip: '籌碼篩選',
 	};
 
 	let selectMarketType = '';
@@ -42,6 +52,9 @@
 		MainStore.changeCategory(selectCategory);
 	};
 	const resetFilter = () => {
+		selectMarketType = '';
+		selectCategory = -1;
+		searchText = '';
 		MainStore.resetFilter();
 		activeTab = tabs[0];
 		isReset = true;
@@ -62,7 +75,7 @@
 				bind:value="{searchText}"
 				placeholder="股號 | 股名"
 				class="focus:ring-indigo-500 rounded-md pl-1 w-36"
-				on:input="{changeText}"
+				on:keyup="{changeText}"
 			/>
 		</div>
 		<div class="mx-2">
@@ -70,7 +83,7 @@
 			<select
 				name="marketType"
 				bind:value="{selectMarketType}"
-				class="mt-1 inline-flex px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				class="inline-flex px-4 bg-white rounded-md h-full"
 				on:blur="{changeMarketType}"
 			>
 				<option value="">全部</option>
@@ -81,12 +94,7 @@
 		</div>
 		<div class="mx-2">
 			<span>產業</span>
-			<select
-				name="category"
-				bind:value="{selectCategory}"
-				class="mt-1 inline-flex px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				on:blur="{changeCategory}"
-			>
+			<select name="category" bind:value="{selectCategory}" class="inline-flex px-4 bg-white rounded-md h-full" on:blur="{changeCategory}">
 				<option value="{-1}">全部</option>
 				{#each $MainStore.categoryList as category}
 					<option value="{category}">{!category ? '無' : category}</option>
@@ -96,7 +104,7 @@
 
 		<div class="flex flex-1 justify-end">
 			<button
-				class="border border-blue-500 bg-blue-500 text-white rounded-md px-4 transition duration-500 ease select-none hover:bg-blue-600 focus:outline-none focus:shadow-outline"
+				class="border reset text-white rounded-md px-4 transition duration-500 ease select-none hover:bg-blue-600 focus:outline-none focus:shadow-outline"
 				on:click="{resetFilter}"
 			>重設</button>
 		</div>
@@ -104,18 +112,18 @@
 	<div class="mt-2">
 		<Tab tabs="{tabs}" bind:activeTab changeTab="{changeTab}" />
 	</div>
-	<div class="mt-2 flex flex-wrap">
+	<div class="mt-2 flex flex-col w-full">
 		{#if activeTab === filterTabOption.priceVol}
-			<PriceVolFilter bind:isReset />
+			<PriceVolFilter />
 		{:else if activeTab === filterTabOption.strategy}
-			<StrategyFilter bind:isReset />
-		{:else if activeTab === filterTabOption.big3}
-			<BigThreeFilter bind:isReset />
+			<StrategyFilter />
+		{:else if activeTab === filterTabOption.bargainChip}
+			<BargainChipFilter bind:isReset />
 		{/if}
 	</div>
 	<div class="mt-2 flex flex-wrap">
 		{#each $MainStore.tags as tag}
-			<div class="border border-blue-500 bg-blue-500 text-white mx-1 px-1">{tag}</div>
+			<div class="border tag text-white mx-1 px-1" transition:fly>{tag}</div>
 		{/each}
 	</div>
 </div>

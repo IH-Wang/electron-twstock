@@ -2,14 +2,10 @@
 	import * as R from 'ramda';
 	// component
 	import styled from './Tab.module.scss';
-	export let title = '';
 	export let classProp = '';
 	export let tabs = [];
-	export let options = [];
 	export let activeTab;
 	export let changeTab;
-	export let changeOption;
-	export let selectedOption;
 	const setTab = (tab) => {
 		if (activeTab === tab) {
 			changeTab('');
@@ -19,7 +15,21 @@
 	};
 </script>
 
-<div class="{styled.tabPanelWrapper} flex-1 border shadow py-1 mr-1 text-center">
+{#if !R.isEmpty(tabs)}
+	<ul class="{styled.tabPanel} {classProp} list-reset flex">
+		{#each tabs as tab}
+			<li class="p-0 flex-1">
+				<a
+					class="{tab === activeTab ? styled.active : ''} inline-block w-full text-sm text-center hover:text-gray-500"
+					href="{null}"
+					on:click="{() => setTab(tab)}"
+				>{tab}</a>
+				<slot />
+			</li>
+		{/each}
+	</ul>
+{/if}
+<!-- <div class="{styled.tabPanelWrapper} flex-1 border shadow py-1 mr-1 text-center">
 	<span>{title}</span>
 	{#if !R.isEmpty(tabs)}
 		<ul class="{styled.tabPanel} {classProp} list-reset flex">
@@ -49,4 +59,4 @@
 		</div>
 	{/if}
 	<slot />
-</div>
+</div> -->

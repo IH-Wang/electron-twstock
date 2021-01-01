@@ -9,17 +9,18 @@ builder
 		config: {
 			appId: 'com.electron.twstock',
 			productName: '股溝',
+			copyright: `Copyright © 2020 YHW`,
 			directories: {
-				output: 'build/win',
+				output: 'release/win',
 			},
 			win: {
 				icon: './public/image/stock_256.png',
 			},
 			portable: {
-				artifactName: 'twstock.exe',
+				artifactName: '股溝_alpha_0.1.1.exe',
 			},
 			files: ['public/**/*', 'main.js', 'preload.js'],
-			// asar: false,
+			// asar: true,
 		},
 	})
 	.then(

@@ -1,10 +1,28 @@
 <style>
+	.circleSvg {
+		display: block;
+		margin: 20px auto;
+		max-width: 100%;
+	}
+	.circleBg {
+		fill: none;
+		stroke: var(--theme-progressBG);
+	}
+
+	.circleBar {
+		fill: none;
+		stroke: var(--theme-progressBar);
+		transition: stroke-dashoffset 200ms ease-in-out;
+	}
+	.circleText {
+		font-size: 3rem;
+		text-anchor: middle;
+		fill: var(--theme-titleBarText);
+		font-weight: bold;
+	}
 </style>
 
 <script>
-	// css
-	import styled from './Circle.module.scss';
-
 	export let props;
 	export let progress;
 	let offset = 0;
@@ -17,17 +35,10 @@
 	});
 </script>
 
-<svg class="{styled.circleSvg}" width="{size}" height="{size}">
+<svg class="circleSvg" width="{size}" height="{size}">
+	<circle class="circleBg" stroke="{circleOneStroke}" cx="{center}" cy="{center}" r="{radius}" stroke-width="{strokeWidth}"></circle>
 	<circle
-		class="{styled.circleBg}"
-		stroke="{circleOneStroke}"
-		cx="{center}"
-		cy="{center}"
-		r="{radius}"
-		stroke-width="{strokeWidth}"
-	></circle>
-	<circle
-		class="{styled.circleBar}"
+		class="circleBar"
 		stroke="{circleTwoStroke}"
 		cx="{center}"
 		cy="{center}"
@@ -36,5 +47,5 @@
 		stroke-dasharray="{circumference}"
 		stroke-dashoffset="{offset}"
 	></circle>
-	<text class="{styled.circleText}" x="{center}" y="{center + 20}">{$progress.toFixed(0)}%</text>
+	<text class="circleText" x="{center}" y="{center + 20}">{$progress.toFixed(0)}%</text>
 </svg>

@@ -8,10 +8,21 @@
 </style>
 
 <script>
+	import { getContext, onMount } from 'svelte';
 	import * as R from 'ramda';
 	import { fade } from 'svelte/transition';
+	import { format, differenceInDays } from 'date-fns';
+	const xlsx = require('xlsx');
 	// util
-	import { toCurrency } from '../../util/common/index';
+	import { toCurrency, delay } from '../../util/common';
+	import dbUtil from '../../util/db';
+	import stockUtil from '../../util/stock';
+	// constants
+	import { DB, IPC_INIT_STOCK_INFO, DB_STOCK_INFO } from '../../constants';
+	// component
+	import LineBar from '../common/progressBar/LineBar.svelte';
+	// store
+	import MainStore from '../../stores/main.js';
 	// css
 	import styled from './Table.module.scss';
 
@@ -19,6 +30,15 @@
 	export let count = 0;
 	export let filterProps = { marketType: '', category: -1, isFlagType: false, isReverseType: false };
 	const flagInfoList = ['弱勢', '中等', '強勢'];
+	let totalStock = 0;
+	let db = getContext(DB);
+	let isUpdating = false;
+	let stockList = [];
+	let progress = 0;
+	onMount(async () => {
+		db = await db;
+		totalStock = await dbUtil.getTotalCounts(db, DB_STOCK_INFO);
+	});
 	const getRiseDropColor = (base, compare) => {
 		if (base === compare) {
 			return '';
@@ -37,19 +57,98 @@
 			return '';
 		}
 	};
+	const checkUpdate = async () => {
+		if (isUpdating) {
+			return;
+		}
+		const today = format(new Date(), 'yyyy/MM/dd');
+		const checkDate = stockInfoList[0].date;
+		const checkDiffDays = differenceInDays(new Date(today), new Date(checkDate));
+
+		// 開啟時間超過當天晚上六點半且 db table 資料日期不是當天的, 就抓取當天的
+		isUpdating = true;
+		stockList = $MainStore.baseStockInfoList;
+		await updateStockInfo(0);
+		if (checkDiffDays >= 1 || new Date().valueOf() > new Date(`${today} 18:30:00`).valueOf()) {
+			isUpdating = true;
+			stockList = $MainStore.baseStockInfoList;
+			await updateStockInfo(0);
+		}
+	};
+	const updateStockInfo = async (index) => {
+		if (index < totalStock) {
+			const { code, name, category, marketType } = stockList[index];
+			const stockInfoRes = await window.ipcRenderer.invoke(IPC_INIT_STOCK_INFO, { code, days: 241 }).catch((error) => {
+				console.error(error);
+				updateStockInfo(index);
+			});
+			const stockInfo = stockInfoRes.slice(-1)[0];
+			await dbUtil.setItem(db, {
+				store: DB_STOCK_INFO,
+				data: {
+					code,
+					name,
+					category,
+					marketType,
+					date: stockInfo.date,
+					sortPriority: !category ? 99 : 0,
+					priceInfo: stockUtil.getPriceInfo(stockInfo, stockInfoRes),
+					volInfo: stockUtil.getVolInfo(stockInfo, stockInfoRes),
+					flagInfo: stockUtil.getStockFlagType(stockInfo, stockInfoRes),
+					reverseInfo: stockUtil.getStockReverseType(stockInfo, stockInfoRes),
+					buySellInfo: stockUtil.getNetBuySellInfo(stockInfo, stockInfoRes),
+					bsmInfo: stockUtil.getBSMInfo(stockInfo, stockInfoRes),
+					booleanInfo: stockUtil.getBooleanInfo(stockInfoRes),
+					macdInfo: stockUtil.getMACDInfo(stockInfoRes),
+					kdInfo: stockUtil.getKDInfo(stockInfoRes),
+				},
+			});
+			await delay(300);
+			progress = Math.floor(((index + 1) / totalStock) * 1000) / 1000;
+			await updateStockInfo(index + 1);
+		} else {
+			const updatedStockList = await dbUtil.getAllItems(db, DB_STOCK_INFO);
+			MainStore.setBaseStockInfoList(updatedStockList);
+			MainStore.resetFilter();
+			setTimeout(() => {
+				isUpdating = false;
+				progress = 0;
+				stockList = [];
+			}, 2000);
+		}
+	};
+
+	const downloadToXlsx = async () => {
+		var stockTable = document.getElementById('stockTable');
+		const sheet = xlsx.utils.table_to_sheet(stockTable);
+		console.log(sheet);
+		// xlsx.writeFile(wb, `${format(new Date(), 'yyyy/MM/dd')}.xlsx`);
+	};
 </script>
 
 <div class="w-full">
 	<div class="flex flex-col my-2">
 		<div class="align-middle inline-block w-full px-4">
-			{#if !R.isEmpty(stockInfoList)}
-				<p>日期: {stockInfoList[0].date} | 符合筆數: {count}</p>
+			<div class="inline-flex my-1">
+				<span>日期: {!R.isEmpty(stockInfoList) ? stockInfoList[0].date : format(new Date(), 'yyyy/MM/dd')} | 符合筆數: {count} </span>
+				<i
+					class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
+					on:click="{() => checkUpdate()}"
+				>update</i>
+				<!-- <i
+					class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
+					on:click="{() => downloadToXlsx()}"
+				>download</i> -->
+			</div>
+			{#if isUpdating}
+				<span transition:fade="{{ duration: 200 }}">{progress !== 1 ? '更新股票資訊...' : '更新完成'}</span>
+				<LineBar progressValue="{progress}" />
 			{/if}
 			<div class="{styled.tableWrapper} shadow overflow-auto w-full border-b border-gray-200 sm:rounded-lg">
 				{#if R.isEmpty(stockInfoList)}
 					<span>查無資料</span>
 				{:else}
-					<table class="{styled.table} min-w-full divide-y divide-gray-200">
+					<table class="{styled.table} min-w-full divide-y divide-gray-200" id="stockTable">
 						<thead>
 							<tr class="{styled.tableHeader}">
 								<th scope="col" class="text-center uppercase tracking-wider">股號</th>
@@ -142,9 +241,7 @@
 									<td class="whitespace-nowrap text-sm text-gray-500">{stock.name}</td>
 									<td class="whitespace-nowrap text-sm text-gray-500">{stock.marketType}</td>
 									<td class="whitespace-nowrap text-sm text-gray-500">{stock.category}</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.priceInfo.refPrice)}
-									</td>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.priceInfo.refPrice)}</td>
 									<td
 										class="whitespace-nowrap text-sm text-gray-500 {stock.priceInfo.endPrice === stock.priceInfo.startPrice && (stock.priceInfo.isLimitUp || stock.priceInfo.isLimitDown) ? (stock.priceInfo.isLimitUp ? styled.limitUp : styled.limitDown) : getRiseDropColor(stock.priceInfo.startPrice, stock.priceInfo.refPrice)}"
 									>
@@ -165,9 +262,7 @@
 									>
 										{toCurrency(stock.priceInfo.minPrice)}
 									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.riseDropPrice, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.priceInfo.riseDropPrice, 0)}">
 										{stock.priceInfo.riseDropPrice}
 									</td>
 									<td
@@ -175,91 +270,49 @@
 									>
 										{stock.priceInfo.riseDropMargin}%
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{stock.priceInfo.priceAmplitude}%
-									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.volInfo.vol)}
-									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.bigThree.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500">{stock.priceInfo.priceAmplitude}%</td>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.volInfo.vol)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.bigThree.today, 0)}">
 										{toCurrency(stock.buySellInfo.bigThree.today)}
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.buySellInfo.bigThree.remain)}
-									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.foreign.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.buySellInfo.bigThree.remain)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.foreign.today, 0)}">
 										{toCurrency(stock.buySellInfo.foreign.today)}
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.buySellInfo.foreign.remain)}
-									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.foreign.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.buySellInfo.foreign.remain)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.foreign.today, 0)}">
 										{getBuySellDays(stock.buySellInfo.foreign.days)}
 									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.sites.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.sites.today, 0)}">
 										{toCurrency(stock.buySellInfo.sites.today)}
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.buySellInfo.sites.remain)}
-									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.sites.days, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.buySellInfo.sites.remain)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.sites.days, 0)}">
 										{getBuySellDays(stock.buySellInfo.sites.days)}
 									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.dealer.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.dealer.today, 0)}">
 										{toCurrency(stock.buySellInfo.dealer.today)}
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.buySellInfo.dealer.remain)}
-									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.dealer.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.buySellInfo.dealer.remain)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.dealer.today, 0)}">
 										{getBuySellDays(stock.buySellInfo.dealer.days)}
 									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.major.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.major.today, 0)}">
 										{toCurrency(stock.buySellInfo.major.today)}
 									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.major.today, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.buySellInfo.major.today, 0)}">
 										{getBuySellDays(stock.buySellInfo.major.days)}
 									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.bsmInfo.marginPurchase.change, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.bsmInfo.marginPurchase.change, 0)}">
 										{toCurrency(stock.bsmInfo.marginPurchase.change)}
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.bsmInfo.marginPurchase.remain)}
-									</td>
-									<td
-										class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.bsmInfo.shortSale.change, 0)}"
-									>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.bsmInfo.marginPurchase.remain)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500 {getRiseDropColor(stock.bsmInfo.shortSale.change, 0)}">
 										{toCurrency(stock.bsmInfo.shortSale.change)}
 									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.bsmInfo.shortSale.remain)}
-									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.bsmInfo.marginPurchaseRatio)}
-									</td>
-									<td class="whitespace-nowrap text-sm text-gray-500">
-										{toCurrency(stock.bsmInfo.bsmRatio)}
-									</td>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.bsmInfo.shortSale.remain)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.bsmInfo.marginPurchaseRatio)}</td>
+									<td class="whitespace-nowrap text-sm text-gray-500">{toCurrency(stock.bsmInfo.bsmRatio)}</td>
 									<td class="whitespace-nowrap text-sm text-gray-500 {styled.moreContent}">
 										<p>
 											5MA:{toCurrency(stock.priceInfo.priceMA[1])}
@@ -295,9 +348,7 @@
 										</td>
 									{/if}
 									{#if filterProps.isReverseType}
-										<td class="whitespace-nowrap text-sm text-gray-500">
-											{stock.reverseInfo.reverseType}
-										</td>
+										<td class="whitespace-nowrap text-sm text-gray-500">{stock.reverseInfo.reverseType}</td>
 									{/if}
 								</tr>
 							{/each}

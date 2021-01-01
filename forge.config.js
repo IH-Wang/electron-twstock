@@ -7,7 +7,7 @@ module.exports = {
 	packagerConfig: {
 		icon: 'public/image/icon/stock.icns',
 		executableName: 'electron-twstock',
-		appVersion: '0.1',
+		appVersion: '0.1.1',
 	},
 	electronRebuildConfig: {},
 	makers: [

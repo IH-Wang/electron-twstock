@@ -1,8 +1,8 @@
 import * as ramda from 'ramda';
-import { numRound, numFloor } from '../math';
-export const DAYS = [3, 5, 10, 20, 60, 120, 240];
-const movingAverage = (data, days) => {
-	const movingList = data.slice(days * -1);
+import { numRound } from '../math';
+import { DAYS } from '../../constants';
+const movingAverage = (data, days, isPrevious) => {
+	const movingList = !isPrevious ? data.slice(days * -1) : data.slice((days + 1) * -1, -1);
 	return numRound(ramda.mean(movingList), 2);
 };
 
@@ -71,6 +71,65 @@ const calculateEMA = (mArray, mRange) => {
 	return emaArray;
 };
 
+const calculateLimitPrice = (price) => {
+	const limitUpPrice = price * 1.1;
+	const limitDownPrice = price * 0.9;
+	if (limitUpPrice < 10 && limitDownPrice < 10) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice * 100) * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice * 100) * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice > 10 && limitDownPrice < 10) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice * 100) * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 10 && limitDownPrice >= 10 && limitUpPrice <= 50 && limitDownPrice < 50) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 50 && limitDownPrice < 50) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.05) * 0.05 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 50 && limitDownPrice >= 50 && limitUpPrice < 100 && limitDownPrice < 100) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 100 && limitDownPrice < 100) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.1) * 0.1 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 100 && limitDownPrice >= 100 && limitUpPrice < 1000 && limitDownPrice < 1000) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 1000 && limitDownPrice < 1000) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 5) * 5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 0.5) * 0.5 * 100 * 100) / 100 / 100,
+		};
+	}
+	if (limitUpPrice >= 1000 && limitDownPrice >= 1000) {
+		return {
+			up: Math.floor(Math.floor(limitUpPrice / 5) * 5 * 100 * 100) / 100 / 100,
+			down: Math.floor(Math.ceil(limitDownPrice / 5) * 5 * 100 * 100) / 100 / 100,
+		};
+	}
+};
+
 class StockUtil {
 	// 取得 price 相關資訊
 	static getPriceInfo(stockInfo, stockList) {
@@ -90,31 +149,21 @@ class StockUtil {
 		const riseDropMargin = numRound(((endPrice - refPrice) / refPrice) * 100, 2);
 		// 判斷 5,10,20 日均線糾結
 		const isTangledMA = riskMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((risk) => risk >= -2 && risk <= 3);
 		// 判斷前一天 5, 10, 20 日均線糾結
 		const prePriceMA = DAYS.map((day) => movingAverage(endPriceList.slice(0, -1), day));
-		const preRiskMA = DAYS.map((day) =>
-			numRound(((refPrice - movingAverage(endPriceList.slice(0, -1), day)) / refPrice) * 100, 2),
-		);
+		const preRiskMA = DAYS.map((day) => numRound(((refPrice - movingAverage(endPriceList.slice(0, -1), day)) / refPrice) * 100, 2));
 		const isPreTangledMA = preRiskMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((risk) => risk >= -2 && risk <= 3);
 		// 收盤價在 5, 10, 20 日均線之上
 		const isOverPrePriceMA = prePriceMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((price) => price < endPrice);
 		// 收盤價在 5, 10, 20 日均線之下
 		const isUnderPrePriceMA = prePriceMA
-			.filter(
-				(price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20),
-			)
+			.filter((price, index) => index === DAYS.indexOf(5) || index === DAYS.indexOf(10) || index === DAYS.indexOf(20))
 			.every((price) => price > endPrice);
 		// 突破均線糾結
 		const isBreakTangled = riseDropMargin > 4 && isOverPrePriceMA && isPreTangledMA;
@@ -130,14 +179,16 @@ class StockUtil {
 			priceMA[DAYS.indexOf(5)] < priceMA[DAYS.indexOf(10)] &&
 			priceMA[DAYS.indexOf(10)] < priceMA[DAYS.indexOf(20)] &&
 			priceMA[DAYS.indexOf(20)] < priceMA[DAYS.indexOf(60)];
-		// 判斷漲停
-		const isLimitUp =
-			riseDropPrice > 0 &&
-			riseDropPrice === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
-		// 判斷跌停
-		const isLimitDown =
-			riseDropPrice < 0 &&
-			Math.abs(riseDropPrice) === numFloor(refPrice / 10, refPrice >= 500 ? 0 : refPrice >= 10 ? 1 : 2);
+		// 判斷六線全上或下
+		const checkPriceMA = priceMA.filter((price, index) => index > 0);
+		const isAllLongOrder = checkPriceMA.every((val, index) => (index === 0 ? true : val < checkPriceMA[index - 1]));
+		const isAllShortOrder = checkPriceMA.every((val, index) => (index === 0 ? true : val > checkPriceMA[index - 1]));
+		// 判斷漲停跌停
+		const limitPrice = calculateLimitPrice(refPrice);
+		const isLimitUp = endPrice === limitPrice.up;
+		const isLimitDown = endPrice === limitPrice.down;
+		const isLimitUpOnce = maxPrice === limitPrice.up && endPrice !== limitPrice.up;
+		const isLimitDownOnce = minPrice === limitPrice.down && endPrice !== limitPrice.down;
 		// 判斷均線均線上彎
 		const maReverseUp = DAYS.map(
 			(day) =>
@@ -152,6 +203,19 @@ class StockUtil {
 				endPrice < getNDayAgoStock(endPriceList, day) &&
 				refPrice > getNDayAgoStock(endPriceList, day + 1),
 		);
+		// 判斷回測均線
+		const maBackTest = DAYS.map((day) => {
+			const prePriceMA = movingAverage(endPriceList, day, true);
+			return (
+				(minPrice < prePriceMA && endPrice > prePriceMA) ||
+				(minPrice > prePriceMA && numRound((minPrice - prePriceMA) / prePriceMA, 3) < 0.02)
+			);
+		});
+		// 判斷跌破均線
+		const maFallBelow = DAYS.map((day) => {
+			const prePriceMA = movingAverage(endPriceList, day, true);
+			return endPrice < prePriceMA;
+		});
 
 		return {
 			refPrice,
@@ -171,20 +235,23 @@ class StockUtil {
 			isDropTangled,
 			isLongOrder,
 			isShortOrder,
+			isAllLongOrder,
+			isAllShortOrder,
 			isLimitUp,
 			isLimitDown,
+			isLimitUpOnce,
+			isLimitDownOnce,
 			maReverse: {
 				up: maReverseUp,
 				down: maReverseDown,
 			},
+			maBackTest: {
+				backTest: maBackTest,
+				fallBelow: maFallBelow,
+			},
 			riseDropDays: {
 				price: DAYS.map((day) => numRound(endPrice - getNDayAgoStock(endPriceList, day), 2)),
-				margin: DAYS.map((day) =>
-					numRound(
-						((endPrice - getNDayAgoStock(endPriceList, day)) / getNDayAgoStock(endPriceList, day)) * 100,
-						2,
-					),
-				),
+				margin: DAYS.map((day) => numRound(((endPrice - getNDayAgoStock(endPriceList, day)) / getNDayAgoStock(endPriceList, day)) * 100, 2)),
 			},
 		};
 	}
@@ -199,6 +266,8 @@ class StockUtil {
 			preVol,
 			volRatio: numRound(vol / preVol, 2),
 			volDays: DAYS.map((day) => numRound(movingAverage(volList, day), 0)),
+			maxVolDays: DAYS.map((day) => Math.max(...volList.slice(-day))),
+			minVolDays: DAYS.map((day) => Math.min(...volList.slice(-day))),
 			volDaysRatio: DAYS.map((day) => numRound(vol / movingAverage(volList, day), 2)),
 		};
 	}
@@ -219,10 +288,7 @@ class StockUtil {
 		let flagLevel = 99;
 		let flagVolRatio = 0;
 		// 隔日開平盤的5MA(假定)
-		const priceNext5MA = numRound(
-			(movingAverage(endPriceList, 5) * 5 - getNDayAgoStock(endPriceList, 5) + price) / 5,
-			2,
-		);
+		const priceNext5MA = numRound((movingAverage(endPriceList, 5) * 5 - getNDayAgoStock(endPriceList, 5) + price) / 5, 2);
 		for (let i = 3; i <= 10; i++) {
 			// 前N日之收盤價
 			const calcPrice = getNDayAgoStock(endPriceList, i);
@@ -375,8 +441,7 @@ class StockUtil {
 			}
 		}
 		if (reverseInfo.isReverse) {
-			reverseInfo.reverseType =
-				startPrice > preMaxPrice ? '跳空站上' : startPrice > dropTrendPrice ? '底部站上' : '';
+			reverseInfo.reverseType = startPrice > preMaxPrice ? '跳空站上' : startPrice > dropTrendPrice ? '底部站上' : '';
 		}
 		return reverseInfo;
 	}
@@ -409,7 +474,6 @@ class StockUtil {
 				volRatio: numRound((majorNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(majorList),
 				total: DAYS.map((day) => ramda.sum(majorList.slice(-day))),
-				daysChange: [],
 				turnPoint: getTurningPoint(majorList),
 				placementStrategy: null,
 			},
@@ -419,7 +483,6 @@ class StockUtil {
 				volRatio: numRound((foreignNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(foreignList),
 				total: DAYS.map((day) => ramda.sum(foreignList.slice(-day))),
-				daysChange: DAYS.map((day) => foreignHolding - getNDayAgoStock(foreignList, day)),
 				turnPoint: getTurningPoint(foreignList),
 				placementStrategy: {
 					enter: stockInfo4DaysAgo.foreignHolding === 0 && foreignHolding !== 0,
@@ -432,7 +495,6 @@ class StockUtil {
 				volRatio: numRound((sitesNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(sitesList),
 				total: DAYS.map((day) => ramda.sum(sitesList.slice(-day))),
-				daysChange: DAYS.map((day) => sitesHolding - getNDayAgoStock(sitesList, day)),
 				turnPoint: getTurningPoint(sitesList),
 				placementStrategy: {
 					enter: stockInfo4DaysAgo.sitesHolding === 0 && sitesHolding !== 0,
@@ -445,7 +507,6 @@ class StockUtil {
 				volRatio: numRound((dealerNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(dealerList),
 				total: DAYS.map((day) => ramda.sum(dealerList.slice(-day))),
-				daysChange: DAYS.map((day) => dealerHolding - getNDayAgoStock(dealerList, day)),
 				turnPoint: getTurningPoint(dealerList),
 				placementStrategy: {
 					enter: stockInfo4DaysAgo.dealerHolding === 0 && dealerHolding !== 0,
@@ -458,7 +519,6 @@ class StockUtil {
 				volRatio: numRound((bigThreeNetBuySell / vol) * 100, 2),
 				days: getStockContinuousBuySell(bigThreeList),
 				total: DAYS.map((day) => ramda.sum(bigThreeList.slice(-day))),
-				daysChange: DAYS.map((day) => bigThreeHolding - getNDayAgoStock(bigThreeList, day)),
 				turnPoint: getTurningPoint(bigThreeList),
 				placementStrategy: null,
 			},
@@ -492,9 +552,7 @@ class StockUtil {
 		const endPriceList = stockList.map((stock) => stock.endPrice);
 		const price20MAList = stockList
 			.slice(-20)
-			.map((price, index) =>
-				numRound(movingAverage(endPriceList.slice(0, index === 19 ? undefined : -19 + index), 20), 2),
-			);
+			.map((price, index) => numRound(movingAverage(endPriceList.slice(0, index === 19 ? undefined : -19 + index), 20), 2));
 
 		let total = 0;
 		let preTotal = 0;
@@ -558,6 +616,51 @@ class StockUtil {
 				isRed: getNDayAgoStock(bar, 1) > 0 && getNDayAgoStock(bar, 2) < 0,
 				isGreen: getNDayAgoStock(bar, 1) < 0 && getNDayAgoStock(bar, 2) > 0,
 			},
+		};
+	}
+	// 取得 kd 資訊
+	static getKDInfo(stockList) {
+		const endPriceList = stockList.map((stock) => stock.endPrice);
+		const maxPriceList = stockList.map((stock) => stock.maxPrice);
+		const minPriceList = stockList.map((stock) => stock.minPrice);
+		const rsvList = [];
+		const kList = [];
+		const dList = [];
+		for (let i = 0; i < stockList.length; i++) {
+			if (i >= 8) {
+				const endPrice = endPriceList[i];
+				const minPrice = Math.min(...minPriceList.slice(i - 8, i + 1));
+				const maxPrice = Math.max(...maxPriceList.slice(i - 8, i + 1));
+				const rsv = ((endPrice - minPrice) / (maxPrice - minPrice)) * 100;
+				rsvList.push(rsv);
+			}
+		}
+		rsvList.forEach((rsv, index) => {
+			if (index === 0) {
+				kList.push(50);
+			} else {
+				kList.push((kList[index - 1] * 2) / 3 + rsv / 3);
+			}
+		});
+		kList.forEach((k, index) => {
+			if (index === 0) {
+				dList.push(50);
+			} else {
+				dList.push((dList[index - 1] * 2) / 3 + k / 3);
+			}
+		});
+		return {
+			k: numRound(getNDayAgoStock(kList, 1), 2),
+			d: numRound(getNDayAgoStock(dList, 1), 2),
+			rsv: numRound(getNDayAgoStock(rsvList, 1), 2),
+			cross: {
+				up: getNDayAgoStock(kList, 1) > getNDayAgoStock(dList, 1) && getNDayAgoStock(kList, 2) < getNDayAgoStock(dList, 2),
+				down: getNDayAgoStock(kList, 1) < getNDayAgoStock(dList, 1) && getNDayAgoStock(kList, 2) > getNDayAgoStock(dList, 2),
+			},
+			isOverbuy: getNDayAgoStock(kList, 1) > 80 && getNDayAgoStock(dList, 1) > 70,
+			isOverSell: getNDayAgoStock(kList, 1) < 20 && getNDayAgoStock(dList, 1) < 30,
+			isHighPassivation: kList.slice(-3).every((k) => k >= 80),
+			isLowPassivation: kList.slice(-3).every((k) => k <= 20),
 		};
 	}
 }

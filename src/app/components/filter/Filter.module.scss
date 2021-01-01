@@ -1,0 +1,29 @@
+.filterBtn {
+	background-color: #fff;
+	color: #333;
+	.active {
+		background-color: var(--theme-progressBar);
+		color: #fff;
+	}
+}
+
+.square {
+	background-color: #fff;
+	border: 1px solid var(--theme-progressBar);
+	border-radius: 6px;
+	cursor: pointer;
+	color: #333;
+	&:hover {
+		color: gray;
+	}
+}
+.active {
+	background-color: var(--theme-progressBar);
+	border: 1px solid #fff;
+	color: #fff;
+}
+
+.activeContent {
+	background-color: var(--theme-titleBarBG);
+	border-radius: 6px;
+}

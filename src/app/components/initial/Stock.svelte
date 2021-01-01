@@ -11,7 +11,6 @@
 	import * as R from 'ramda';
 	import { fade } from 'svelte/transition';
 	import { push } from 'svelte-spa-router';
-	import { format, differenceInDays } from 'date-fns';
 
 	// component
 	import ProgressBar from '../common/progressBar/Circle.svelte';
@@ -44,42 +43,17 @@
 		circleTwoStroke: '#7ea9e1',
 	};
 
-	const checkStockInfoList = async (db, checkDate) => {
-		const checkTime = format(new Date(), 'yyyy/MM/dd');
-		const checkDiffDays = differenceInDays(new Date(checkTime), new Date(checkDate));
-		// 開啟時間超過當天晚上六點半且 db table 資料日期不是當天的, 就抓取當天的
-		if (
-			checkDiffDays > 1 ||
-			(new Date().valueOf() > new Date(`${checkTime} 18:30:00`).valueOf() && checkDiffDays === 1)
-		) {
-			const newStockInfoList = await window.ipcRenderer
-				.invoke(IPC_INIT_STOCK_INFO, { code: 2330, days: 1 })
-				.catch((error) => {
-					console.error(error);
-					window.location.reload();
-				});
-			if (newStockInfoList[0].date !== checkDate) {
-				await dbUtil.clearStore(db, DB_STOCK_INFO);
-				return false;
-			}
-		} else {
-			return true;
-		}
-	};
-
 	const initStockInfo = async (index) => {
 		if (index < totalStocks) {
 			const { code, name, category, marketType } = stockCodeList[index];
 			stockCode = { code, name, category, marketType };
 			// db table 沒有才去爬資料
 			if (R.isNil(stockInfoList.find((stock) => stock.code === code))) {
-				const stockInfoRes = await window.ipcRenderer
-					.invoke(IPC_INIT_STOCK_INFO, { code, days: 121 })
-					.catch((error) => {
-						console.error(error);
-						window.location.reload();
-					});
-				if (stockInfoRes.length === 121) {
+				const stockInfoRes = await window.ipcRenderer.invoke(IPC_INIT_STOCK_INFO, { code, days: 241 }).catch((error) => {
+					console.error(error);
+					window.location.reload();
+				});
+				if (stockInfoRes.length === 241) {
 					const stockInfo = stockInfoRes.slice(-1)[0];
 					await dbUtil.setItem(db, {
 						store: DB_STOCK_INFO,
@@ -98,6 +72,7 @@
 							bsmInfo: stockUtil.getBSMInfo(stockInfo, stockInfoRes),
 							booleanInfo: stockUtil.getBooleanInfo(stockInfoRes),
 							macdInfo: stockUtil.getMACDInfo(stockInfoRes),
+							kdInfo: stockUtil.getKDInfo(stockInfoRes),
 						},
 					});
 				} else {
@@ -117,9 +92,7 @@
 		db = await db;
 		stockInfoList = await dbUtil.getAllItems(db, DB_STOCK_INFO);
 		if (stockInfoList.length === totalStocks) {
-			const isNewDate = await checkStockInfoList(db, stockInfoList[0].date);
-			await delay(200);
-			isNewDate ? percent.set(100) : initStockInfo(0);
+			percent.set(100);
 		} else {
 			initStockInfo(0);
 		}
@@ -141,6 +114,6 @@
 		{:else}
 			<p>全部資料建置完成</p>
 		{/if}
-		<p class="{styled.memo}">(各股抓取120天資料做建置, 不滿120天暫不建檔)</p>
+		<p class="{styled.memo}">(各股抓取 240 天資料做建置, 不滿 240 天暫不建檔)</p>
 	</div>
 </div>
