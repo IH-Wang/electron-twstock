@@ -135,10 +135,10 @@
 					class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
 					on:click="{() => checkUpdate()}"
 				>update</i>
-				<i
+				<!-- <i
 					class="material-icons mx-1   {isUpdating ? 'text-gray-300' : 'cursor-pointer hover:text-gray-500'}"
 					on:click="{() => downloadToXlsx()}"
-				>download</i>
+				>download</i> -->
 			</div>
 			{#if isUpdating}
 				<span transition:fade="{{ duration: 200 }}">{progress !== 1 ? '更新股票資訊...' : '更新完成'}</span>

@@ -22,7 +22,7 @@
 	};
 </script>
 
-<div class="{styled.titleBar}">
+<div class="{styled.titleBar} transition duration-500 ease">
 	<header class="flex mx-auto px-3 justify-between items-center">
 		{#if process.platform === 'darwin'}
 			<nav>
@@ -58,10 +58,14 @@
 			<nav>
 				<ul class="{styled.titleControl}">
 					<li class="ml-4">
-						<button class="{styled.titleButton} focus:outline-none" on:click="{minimize}"> <i class="material-icons">minimize</i> </button>
+						<button class="{styled.titleButton} focus:outline-none" on:click="{minimize}">
+							<i class="material-icons">minimize</i>
+						</button>
 					</li>
 					<li class="ml-4">
-						<button class="{styled.titleButton} focus:outline-none" on:click="{maximize}"> <i class="material-icons">open_in_full</i> </button>
+						<button class="{styled.titleButton} focus:outline-none" on:click="{maximize}">
+							<i class="material-icons">open_in_full</i>
+						</button>
 					</li>
 					<li class="ml-4">
 						<button class="{styled.titleButton} focus:outline-none" on:click="{close}"> <i class="material-icons">close</i> </button>
